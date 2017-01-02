@@ -8,7 +8,7 @@ To config
   
 To setup
   
-  * run in neo4j: CREATE (n:Id {name: "post", id: 0}) RETURN n
+  * run in neo4j: `CREATE (n:Id {name: "post", id: 0}) RETURN n`
 
 To start your Phoenix app:
 
