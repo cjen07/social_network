@@ -5,6 +5,10 @@ To config
   * mailgun in config/config.exs
   * arc in config/config.exs
   * neo4j/bolt in config/config.exs
+  
+To setup
+  
+  * run in neo4j: CREATE (n:Id {name: "post", id: 0}) RETURN n
 
 To start your Phoenix app:
 
