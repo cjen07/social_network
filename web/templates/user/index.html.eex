@@ -1,0 +1,105 @@
+<%= if @search do %>
+  <h2>Search results</h2>
+<% else %>
+  <% [h|_] = :erlang.binary_to_term(@now) %>
+  <%= if @fof do %>
+    <%= if h["email"] == Coherence.current_user(@conn).email do %>
+      <%= if h["type"] == "0" do %>
+        <h2>Your Followings</h2>
+        |
+        <%= link "Followers", to: user_path(@conn, :friends_of_friends, %{:user => Map.put(h, "type", "1"), :now => @now}) %>
+      <% else %>
+        <h2>Your Followers</h2>
+        |
+        <%= link "Followings", to: user_path(@conn, :friends_of_friends, %{:user => Map.put(h, "type", "0"), :now => @now}) %>
+      <% end %>
+    <% else %>
+      <%= if h["type"] == "0" do %>
+        <h2><%= h["name"] <> "'s" %> Followings</h2>
+        |
+        <%= link "Followers", to: user_path(@conn, :friends_of_friends, %{:user => Map.put(h, "type", "1"), :now => @now}) %>
+      <% else %>
+        <h2><%= h["name"] <> "'s" %> Followers</h2>
+        |
+        <%= link "Followings", to: user_path(@conn, :friends_of_friends, %{:user => Map.put(h, "type", "0"), :now => @now}) %>
+      <% end %>
+    <% end %>
+  <% else %>
+    <h2>Your Followings</h2>
+    |
+    <%= link "Followers", to: user_path(@conn, :friends_of_friends, %{:user => Map.put(h, "type", "1"), :now => @now}) %>
+  <% end %>
+<% end %>
+
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>avatar</th>
+      <th>name</th>
+      <th>email</th>
+    </tr>
+  </thead>
+  <tbody>
+<%= for user <- @users do %>
+    <tr>
+      <td><%= img_tag(Exgravatar.gravatar_url(user["email"], secure: false, s: 30))%></td>
+      <td><%= user["name"] %></td>
+      <td><%= user["email"] %></td>
+
+      <td class="text-right">
+        <%= if user["email"] == Coherence.current_user(@conn).email do %>
+          <%= link "Home", to: post_path(@conn, :index), class: "btn btn-success btn-xs" %>
+        <% else %>
+          <%= link "Home", to: post_path(@conn, :friend, %{:user => user}), class: "btn btn-success btn-xs" %>
+        <% end %>
+        <%= link "Followings", to: user_path(@conn, :friends_of_friends, %{:user => Map.put(user, "type", "0"), :now => @now}), class: "btn btn-info btn-xs" %>
+        <%= link "Followers", to: user_path(@conn, :friends_of_friends, %{:user => Map.put(user, "type", "1"), :now => @now}), class: "btn btn-info btn-xs" %>
+        <%= if user["email"] == Coherence.current_user(@conn).email do %>
+          <%= link "You", to: user_path(@conn, :index), class: "btn btn-primary btn-xs you" %>
+        <% else %>
+          <%= if @fof do %>
+            <%= if user["flag"] do %>
+              <%= link "Unfollow", to: user_path(@conn, :unfollow, %{:user => user, :now => @now}), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-danger btn-xs" %>
+            <% else %>
+              <%= link "follow", to: user_path(@conn, :follow, %{:user => user, :now => @now}), method: :post, data: [confirm: "Are you sure?"], class: "btn btn-warning btn-xs" %>
+            <% end %>
+          <% else %>
+            <%= if @search do %>
+              <%= if user["flag"] do %>
+                <%= link "Unfollow", to: user_path(@conn, :unfollow, %{:user => user, :now => @now}), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-danger btn-xs" %>
+              <% else %>
+                <%= link "follow", to: user_path(@conn, :follow, %{:user => user, :now => @now}), method: :post, data: [confirm: "Are you sure?"], class: "btn btn-warning btn-xs" %>
+              <% end %>
+            <% else %>
+              <%= link "Unfollow", to: user_path(@conn, :unfollow, %{:user => user, :now => :erlang.term_to_binary([])}), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-danger btn-xs" %>
+            <% end %>
+          <% end %>
+        <% end %>
+
+      </td>
+    </tr>
+<% end %>
+  </tbody>
+</table>
+
+<%= link "Search friends", to: user_path(@conn, :search_form, %{:fof => @fof, :now => @now}) %>
+<%= if @fof do %>
+  |
+  <% [_|t] = :erlang.binary_to_term(@now) %>
+  <% [m|n] = t %>
+  <%= if m["email"] == Coherence.current_user(@conn).email and m["type"] == nil do %>
+    <%= link "Back", to: user_path(@conn, :index) %>
+  <% else %>
+    <%= if m["search"] do %>
+      <%= link "Back", to: user_path(@conn, :search_submit, %{:search => m}), method: :post %>
+    <% else %>
+      <% n = :erlang.term_to_binary(n) %>
+      <%= link "Back", to: user_path(@conn, :friends_of_friends, %{:user => m, :now => n}) %>
+    <% end %>
+  <% end %>
+<% end %>
+<%= if @search do %>
+  |
+  <%= link "Back", to: user_path(@conn, :index) %>
+<% end %>

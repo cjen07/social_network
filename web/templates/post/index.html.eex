@@ -1,0 +1,130 @@
+<%= if @type == "0" do %>
+  <h2>Your Posts</h2>
+  <%= form_for @conn, post_path(@conn, :create_post), [multipart: true, as: :post], fn f -> %>
+
+    <div class="form-group">
+      <%= label f, :text, class: "control-label" %>
+      <%= text_input f, :text, class: "form-control" %>
+    </div>
+
+    <div class="form-group">
+      <%= label f, :photo, class: "control-label" %>
+      <div class="input-group image-preview">
+          <input type="text" class="form-control image-preview-filename" disabled="disabled"> 
+          <span class="input-group-btn">
+              <!-- image-preview-clear button -->
+              <button type="button" class="btn btn-default image-preview-clear" style="display:none;">
+                  <span class="glyphicon glyphicon-remove"></span> Clear
+              </button>
+              <!-- image-preview-input -->
+              <div class="btn btn-default image-preview-input">
+                  <span class="glyphicon glyphicon-folder-open"></span>
+                  <span class="image-preview-input-title">Browse</span>
+                  <%= file_input f, :photo, class: "form-control",
+                   accept: "image/png, image/jpeg, image/gif" %>
+              </div>
+          </span>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <%= submit "New", class: "btn btn-primary" %>
+    </div>
+  <% end %>
+<% else %>
+  <%= if @type == "1" do %>
+    <h2><%= @user["name"] <> "'s" %> Posts</h2>
+  <% else %>
+    <h2>Your Friends' Posts</h2>
+  <% end %>
+<% end %>
+
+
+<%= for post <- @posts do %>
+  <div class="panel panel-default panel-google-plus">
+      <div class="panel-heading">
+        <%= if @type == "2" do %>
+          <% user = post["user"] %>
+          <%= img_tag(Exgravatar.gravatar_url(user["email"], secure: false, s: 50), class: "img-circle avatar pull-left", alt: "user profile image")%>
+          <h3><%= user["name"] %></h3>
+          <h5><span><%= parse_time(post["time"]) %></span></h5>
+        <% else %>
+          <h3><%= parse_time(post["time"]) %></h3> 
+        <% end %>
+      </div>
+      <div class="panel-google-plus-button">
+        <%= if @type == "0" do %>
+          <%= link "Delete", to: post_path(@conn, :delete_post, post), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-danger btn-xs" %>
+        <% else %>
+          <% post_id = post["id"] %>
+          <button type="button" class="btn-heart btn btn-default btn-xs" id="<%= post_id %>">
+            <%= if post["thumbed"] do %>
+              <span id="0" class="glyphicon glyphicon-heart glyphicon-btn"></span>
+            <% else %>
+              <span id="1" class="glyphicon glyphicon-heart-empty glyphicon-btn"></span>
+            <% end %>            
+          </button>
+        <% end %>
+      </div>    
+      <div class="panel-body">
+          <p><%= post["text"] %></p>
+          <%= if post["has_image"] do %>
+            <a class="panel-google-plus-image" >
+              <%= img_tag(Image.url({post["file"], post["id"]}, :original) |> Path.relative_to("/priv/static"))%>
+            </a>
+          <% end %>
+          <% thumbs = :erlang.binary_to_term(post["thumbs"]) %>
+          <% post_id = post["id"] %>
+          <span id="thumb_<%= post_id %>">
+            <%= if length(thumbs) != 0 do %>
+              <%= if post["has_image"] do %>
+                <br>
+              <% end %>
+              <span class="glyphicon glyphicon-heart glyphicon-thumb"></span>
+              <%= for thumb <- thumbs do %>
+                <%= if thumb["email"] == Coherence.current_user(@conn).email do %>
+                  <%= link thumb["name"], to: post_path(@conn, :index), class: "btn btn-default btn-xs" %>
+                <% else %>
+                  <%= link thumb["name"], to: post_path(@conn, :friend, %{:user => thumb}), class: "btn btn-default btn-xs" %>
+                <% end %>
+              <% end %>
+            <% end %>
+          </span>
+      </div>
+      <div class="panel-footer">
+        <% comments = :erlang.binary_to_term(post["comments"]) %>
+        <% post_id = post["id"] %>
+        <span id="comment_<%= post_id %>">
+          <%= for piece <- comments do %>
+
+            <% user = piece["user"] %>
+            <div class="comment">
+                <a class="pull-left">
+                    <%= img_tag(Exgravatar.gravatar_url(user["email"], secure: false, s: 50), class: "img-circle avatar", alt: "User Image")%>
+                </a>
+                <div class="comment-body">
+                    <div class="comment-heading">
+                        <h4 class="user"><%= user["name"] %></h4>
+                        <h5 class="time"><%= parse_time(piece["time"]) %></h5>
+                    </div>
+                    <p><%= piece["text"] %></p>
+                </div>
+            </div>
+          <% end %>
+        </span>
+        <div class="input-placeholder">Add a comment...</div>
+      </div>
+      <div class="panel-google-plus-comment">
+          <%= img_tag(Exgravatar.gravatar_url(Coherence.current_user(@conn).email, secure: false, s: 50), class: "img-circle", alt: "User Image")%>
+          <div class="panel-google-plus-textarea">
+              <textarea rows="4"></textarea>
+              <% post_id = post["id"] %>
+              <button type="submit" class="btn btn-success btn-comment disabled" id="<%= post_id %>">Post comment</button>
+              <button type="reset" class="btn btn-default">Cancel</button>
+          </div>
+          <div class="clearfix"></div>
+      </div>
+
+        
+  </div>
+<% end %>

@@ -1,0 +1,30 @@
+<h2>Search friends</h2>
+
+<%= form_for @conn, user_path(@conn, :search_submit), [as: :search], fn f -> %>
+
+  <div class="form-group">
+    <%= label f, :name, class: "control-label" %>
+    <%= text_input f, :name, class: "form-control" %>
+  </div>
+
+  <div class="form-group">
+    <%= label f, :email, class: "control-label" %>
+    <%= text_input f, :email, class: "form-control"%>
+  </div>
+
+  <div class="form-group">
+    <%= submit "Submit", class: "btn btn-primary" %>
+  </div>
+<% end %>
+
+<%= if @fof do %>
+  <% [h|t] = :erlang.binary_to_term(@now) %>
+  <% t = :erlang.term_to_binary(t) %>
+  <%= if h["email"] == Coherence.current_user(@conn).email and h["type"] != 1  do %>
+    <%= link "Back", to: user_path(@conn, :index) %>
+  <% else %>
+    <%= link "Back", to: user_path(@conn, :friends_of_friends, %{:user => h, :now => t}) %>
+  <% end %>
+<% else %>
+  <%= link "Back", to: user_path(@conn, :index) %>
+<% end %>

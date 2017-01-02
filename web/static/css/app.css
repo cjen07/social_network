@@ -1,0 +1,231 @@
+/* This file is for your main application css. */
+
+/* Little fix of "Sign Out" border */
+a.navbar-form {
+  padding: 0;
+  border: none;
+  background: none;
+}
+
+.btn-warning, .you {
+  width: 57.36px;
+}
+
+/*image upload*/
+
+.container{
+    margin-top:20px;
+}
+.image-preview-input {
+    position: relative;
+  overflow: hidden;
+  margin: 0px;    
+    color: #333;
+    background-color: #fff;
+    border-color: #ccc;    
+}
+.image-preview-input input[type=file] {
+  position: absolute;
+  top: 0;
+  right: 0;
+  margin: 0;
+  padding: 0;
+  font-size: 20px;
+  cursor: pointer;
+  opacity: 0;
+  filter: alpha(opacity=0);
+}
+.image-preview-input-title {
+    margin-left:2px;
+}
+
+/*post*/
+
+@import url(http://fonts.googleapis.com/css?family=Roboto:400,700);
+
+.panel-google-plus {
+    position: relative;
+    border-radius: 0px;
+    border: 1px solid rgb(216, 216, 216);
+    font-family: 'Roboto', sans-serif;
+}
+
+.panel-google-plus > .panel-google-plus-button{
+    position: absolute;
+    top: 12px;
+    right: 17px;
+}
+
+.panel-google-plus > .panel-google-plus-button > .btn:focus {
+    outline: none;
+}
+
+.panel-google-plus > .panel-heading,
+.panel-google-plus > .panel-footer {
+    background-color: rgb(255, 255, 255);
+    border-width: 0px; 
+}
+.panel-google-plus > .panel-heading {
+    margin-top: 5px;    
+    padding-bottom: 5px; 
+}
+.panel-google-plus > .panel-heading > img { 
+    margin-right: 15px;
+}
+.panel-google-plus > .panel-heading > h3 {
+    margin: 0px;
+    margin-top: 7px; 
+    font-size: 14px;
+    font-weight: 700;
+}
+.panel-google-plus > .panel-heading > h5 {
+    margin-top: 5px; 
+    color: rgb(153, 153, 153);
+    font-size: 12px;
+    font-weight: 400;
+}
+.panel-google-plus > .panel-body {
+    padding-top: 5px;
+    font-size: 13px;
+}
+
+.panel-google-plus > .panel-body p {
+    font-size: 14px;
+}
+
+.panel-google-plus > .panel-body > .panel-google-plus-image {
+    display: block;
+    text-align: center;
+    background-color: rgb(245, 245, 245);
+    border: 1px solid rgb(217, 217, 217);
+}
+.panel-google-plus > .panel-body > .panel-google-plus-image > img {
+    max-width: 100%;
+}
+
+.panel-google-plus > .panel-footer {
+    margin-top: -15px;
+    font-size: 14px;
+    font-weight: 700;
+    min-height: 0px;
+}
+.panel-google-plus > .panel-footer > .btn {
+    float: left;
+    margin-right: 8px;
+}
+.panel-google-plus > .panel-footer > .input-placeholder {
+    display: block;
+    margin-left: 0px;
+    color: rgb(153, 153, 153);
+    font-size: 12px;
+    font-weight: 400;
+    padding: 8px 6px 7px;
+    border: 1px solid rgb(217, 217, 217);
+    border-radius: 2px;
+    box-shadow: rgba(0, 0, 0, 0.0470588) 0px 1px 0px 0px;
+}
+.panel-google-plus.panel-google-plus-show-comment > .panel-footer > .input-placeholder {
+    display: none;   
+}
+.panel-google-plus > .panel-google-plus-comment {
+    display: none;
+    padding: 10px 10px 15px;
+    border-top: 1px solid rgb(229, 229, 229);
+    background-color: rgb(245, 245, 245);
+}
+.panel-google-plus.panel-google-plus-show-comment > .panel-google-plus-comment {
+    display: block;
+}
+.panel-google-plus > .panel-google-plus-comment > img {
+    float: left; 
+}
+.panel-google-plus > .panel-google-plus-comment > .panel-google-plus-textarea {
+    float: right;
+    width: calc(100% - 60px);
+}
+.panel-google-plus > .panel-google-plus-comment > .panel-google-plus-textarea > textarea {
+    display: block;
+    width: 100%;
+    background-color: rgb(255, 255, 255);
+    border: 1px solid rgb(217, 217, 217);
+    box-shadow: rgba(0, 0, 0, 0.0470588) 0px 1px 0px 0px;
+    resize: vertical;
+}
+.panel-google-plus > .panel-google-plus-comment > .panel-google-plus-textarea > .btn {
+    margin-top: 10px;
+    margin-right: 8px;
+    width: 100%;
+}
+@media (min-width: 992px) {
+    .panel-google-plus > .panel-google-plus-comment > .panel-google-plus-textarea > .btn {
+        width: auto;
+    }    
+}
+
+.glyphicon-btn {
+    margin-top: 4px;
+    margin-right: 1.5px;
+    font-size: 15px;
+}
+
+.glyphicon-thumb {
+    font-size: 12px;
+}
+
+.glyphicon.glyphicon-heart {
+    color: #d70000;
+}
+
+/*hide unused*/
+
+#hideAll
+{
+    position: fixed;
+    left: 0px; 
+    right: 0px; 
+    top: 0px; 
+    bottom: 0px; 
+    background-color: white;
+    z-index: 99; /* Higher than anything else in the document */
+}
+
+/*comment*/
+
+.comment {
+  display: block;
+  width: 100%;
+  margin: 5px 5;
+}
+.comment .avatar {
+  width: 35px;
+  height: 35px;
+}
+.comment .comment-heading {
+  display: block;
+  width: 100%;
+}
+.comment .comment-heading .user {
+  font-size: 13px;
+  font-weight: bold;
+  display: inline;
+  margin-top: 0;
+  margin-right: 10px;
+}
+.comment .comment-heading .time {
+  font-size: 12px;
+  color: #aaa;
+  margin-top: 0;
+  display: inline;
+}
+.comment .comment-body {
+  margin-left: 50px;
+}
+
+.comment .comment-body p {
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.comment > {
+  margin-left: 50px;
+}
