@@ -63,6 +63,7 @@ defmodule SocialNetwork.Router do
     pipe_through :api
     pipe_through :protected
     get "/thumb", PostController, :thumb
-    get "/comment", PostController, :comment
+    get "/comment/create", PostController, :create_comment
+    get "/comment/delete", PostController, :delete_comment
   end
 end

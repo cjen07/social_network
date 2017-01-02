@@ -34,12 +34,12 @@ $(function () {
 
       }, "json");
   });
-  $('.btn-comment').click(function(){
+  $('.btn-comment-create').click(function(){
     var $panel = $(this).closest('.panel-google-plus');
     var $comment = $panel.find('.panel-google-plus-comment');
     var post_id = $(this).attr('id');
     var text = $comment.find('textarea').val();
-    $.get("/api/comment?post_id=" + post_id + "&comment=" + encodeURIComponent(text),
+    $.get("/api/comment/create?post_id=" + post_id + "&comment=" + encodeURIComponent(text),
       function (data){
         var comments = data.comments;
         $("#comment_" + post_id).empty();
@@ -57,11 +57,22 @@ $(function () {
                        .text(e.user.name);
           var $time = $('<h5/>')
                        .addClass("time")
-                       .text(e.time);
+                       .text(e.from_now);
           var $head = $('<div/>')
                        .addClass("comment-heading")
                        .append($user)
+                       .append(" ")
                        .append($time);
+          if (e.self){
+            var $delete = $('<button/>', {
+                "class": "btn btn-default btn-comment-delete btn-xs",
+                time: e.time,
+                id: post_id,
+                text: "delete"
+            });
+            $head.append(" ");
+            $head.append($delete);
+          }
           var $text = $('<p/>').text(e.text);         
           var $body = $('<div/>')
                        .addClass("comment-body")
@@ -76,6 +87,57 @@ $(function () {
         });
       }, "json");
     $comment.find('button[type="reset"]').click();
+  });
+  $(".panel-footer").on("click", '.btn-comment-delete', function(){
+    var post_id = $(this).attr('id');
+    var time = $(this).attr('time');
+    $.get("/api/comment/delete?post_id=" + post_id + "&time=" + time,
+      function (data){
+        var comments = data.comments;
+        $("#comment_" + post_id).empty();
+        comments.forEach(function (e){
+          var $img = $('<img/>', {
+              alt: "User Image",
+              "class": "img-circle avatar", 
+              src: e.url
+          });
+          var $a = $('<a/>')
+                    .addClass("pull-left")
+                    .append($img);
+          var $user = $('<h4/>')
+                       .addClass("user")
+                       .text(e.user.name);
+          var $time = $('<h5/>')
+                       .addClass("time")
+                       .text(e.from_now);
+          var $head = $('<div/>')
+                       .addClass("comment-heading")
+                       .append($user)
+                       .append(" ")
+                       .append($time);
+          if (e.self){
+            var $delete = $('<button/>', {
+                "class": "btn btn-default btn-comment-delete btn-xs",
+                time: e.time,
+                id: post_id,
+                text: "delete"
+            });
+            $head.append(" ");
+            $head.append($delete);
+          }
+          var $text = $('<p/>').text(e.text);         
+          var $body = $('<div/>')
+                       .addClass("comment-body")
+                       .append($head)
+                       .append($text);
+          $("#comment_" + post_id).append(
+            $('<div/>')
+              .addClass("comment")
+              .append($a)
+              .append($body)
+          );
+        });
+      }, "json");
   });
   $('.panel-google-plus > .panel-footer > .input-placeholder, .panel-google-plus > .panel-google-plus-comment > .panel-google-plus-textarea > button[type="reset"]').on('click', function(event) {
     var $panel = $(this).closest('.panel-google-plus');

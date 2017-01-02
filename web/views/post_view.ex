@@ -8,7 +8,7 @@ defmodule SocialNetwork.PostView do
   def render("comment.json", %{comments: comments}) do
     comments = 
       comments
-      |> Enum.map(fn c -> Map.put(c, "time", parse_time(c["time"])) end)
+      |> Enum.map(fn c -> Map.put(c, "from_now", parse_time(c["time"])) end)
       |> Enum.map(fn c -> Map.put(c, "url", Exgravatar.gravatar_url(c["user"]["email"], secure: false, s: 50)) end)
     %{comments: comments}
   end

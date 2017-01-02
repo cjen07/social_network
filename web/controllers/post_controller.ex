@@ -352,7 +352,7 @@ defmodule SocialNetwork.PostController do
 
   end
 
-  def comment(conn, %{"post_id" => post_id, "comment" => comment}) do
+  def create_comment(conn, %{"post_id" => post_id, "comment" => comment}) do
     
     Logger.info "here is post_id"
     Logger.debug "#{inspect(post_id)}"
@@ -390,10 +390,56 @@ defmodule SocialNetwork.PostController do
     comments = result1 |> Enum.map(fn x -> (x["comment"]).properties end)
     users = result1 |> Enum.map(fn x -> (x["user"]).properties end)
     comments = 
-      Enum.zip(comments, users)
+      Enum.zip(comments, users) 
       |> Enum.map(fn {c, u} -> Map.put(c, "user", u) end)
+      |> Enum.map(fn c -> Map.put(c, "self", c["user"]["email"] == Coherence.current_user(conn).email) end)
 
     render(conn, "comment.json", comments: comments)
+  end
+
+  def delete_comment(conn, %{"post_id" => post_id, "time" => time}) do
+
+    Logger.info "here is post_id"
+    Logger.debug "#{inspect(post_id)}"
+
+    Logger.info "here is time"
+    Logger.debug "#{inspect(time)}"
+
+    user = Coherence.current_user(conn)
+    email = user.email
+
+    id = String.to_integer(post_id)
+    time = String.to_integer(time)
+
+    cypher = """
+      MATCH (a:Post {id: #{id}})<-[:POINTS_TO]-(b:Comment {time: #{time}})-[:BELONGS_TO]->(c:User {email: '#{email}'})
+      DETACH DELETE b
+    """
+    result = Bolt.query!(Bolt.conn, cypher)
+
+    Logger.info "here is created comment result"
+    Logger.debug "#{inspect(result)}"
+
+    cypher = """
+      MATCH (a:Post {id: #{id}})<-[:POINTS_TO]-(b:Comment)-[:BELONGS_TO]->(c:User)
+      RETURN b As comment, c As user
+      ORDER BY b.time
+    """
+
+    result1 = Bolt.query!(Bolt.conn, cypher)
+
+    Logger.info "here is all comments result1"
+    Logger.debug "#{inspect(result1)}"
+
+    comments = result1 |> Enum.map(fn x -> (x["comment"]).properties end)
+    users = result1 |> Enum.map(fn x -> (x["user"]).properties end)
+    comments = 
+      Enum.zip(comments, users) 
+      |> Enum.map(fn {c, u} -> Map.put(c, "user", u) end)
+      |> Enum.map(fn c -> Map.put(c, "self", c["user"]["email"] == Coherence.current_user(conn).email) end)
+
+    render(conn, "comment.json", comments: comments)
+    
   end
 
 end

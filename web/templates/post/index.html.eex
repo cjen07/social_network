@@ -96,7 +96,6 @@
         <% post_id = post["id"] %>
         <span id="comment_<%= post_id %>">
           <%= for piece <- comments do %>
-
             <% user = piece["user"] %>
             <div class="comment">
                 <a class="pull-left">
@@ -106,6 +105,10 @@
                     <div class="comment-heading">
                         <h4 class="user"><%= user["name"] %></h4>
                         <h5 class="time"><%= parse_time(piece["time"]) %></h5>
+                        <%= if user["email"] == Coherence.current_user(@conn).email do %>
+                          <% time = piece["time"] %>
+                          <button class="btn btn-default btn-comment-delete btn-xs" time="<%= time %>" id="<%= post_id %>">delete</button>
+                        <% end %>
                     </div>
                     <p><%= piece["text"] %></p>
                 </div>
@@ -119,7 +122,7 @@
           <div class="panel-google-plus-textarea">
               <textarea rows="4"></textarea>
               <% post_id = post["id"] %>
-              <button type="submit" class="btn btn-success btn-comment disabled" id="<%= post_id %>">Post comment</button>
+              <button type="submit" class="btn btn-success btn-comment-create disabled" id="<%= post_id %>">Post comment</button>
               <button type="reset" class="btn btn-default">Cancel</button>
           </div>
           <div class="clearfix"></div>

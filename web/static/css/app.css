@@ -229,3 +229,9 @@ a.navbar-form {
 .comment > {
   margin-left: 50px;
 }
+
+/*comment-delete btn*/
+
+.btn-comment-delete {
+  font-size: 11px;
+}
