@@ -17,9 +17,14 @@ To start your Phoenix app:
   * Install Node.js dependencies with `npm install`
   * Make sure the neo4j database is up with bolt enabled on port 7687
   * Start Phoenix endpoint with `mix phoenix.server`
+  * Now you can visit `localhost:4000` from your browser.
 
-Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
+Feature
 
-Bug to fix
+  * one comment can only be referred to one comment at one time using reply button
+  
+To be done
 
-  * comments of multiply lines are shown as a single line with spaces 
+  * message notification
+  * exception handling
+  * private online chat (optional)
