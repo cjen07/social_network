@@ -108,9 +108,20 @@
                         <%= if user["email"] == Coherence.current_user(@conn).email do %>
                           <% time = piece["time"] %>
                           <button class="btn btn-default btn-comment-delete btn-xs" time="<%= time %>" id="<%= post_id %>">delete</button>
+                        <% else %>
+                          <% 
+                            email = user["email"]
+                            name = user["name"]
+                          %>
+                          <button class="btn btn-default btn-comment-reply btn-xs" name="<%= name %>" email="<%= email %>" id="<%= post_id %>">reply</button>
                         <% end %>
                     </div>
-                    <p><%= piece["text"] %></p>
+                    <%= if piece["refer"] == %{} do %>
+                      <pre><%= piece["text"] %></pre>
+                    <% else %>
+                      <% refer = "@" <> piece["refer"]["name"] <> ": " %>
+                      <pre><%= refer %><%= piece["text"] %></pre>
+                    <% end %>
                 </div>
             </div>
           <% end %>

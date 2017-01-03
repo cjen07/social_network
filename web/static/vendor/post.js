@@ -38,8 +38,11 @@ $(function () {
     var $panel = $(this).closest('.panel-google-plus');
     var $comment = $panel.find('.panel-google-plus-comment');
     var post_id = $(this).attr('id');
+    var email = $(this).attr('email');
     var text = $comment.find('textarea').val();
-    $.get("/api/comment/create?post_id=" + post_id + "&comment=" + encodeURIComponent(text),
+    $.get("/api/comment/create?post_id=" + post_id 
+      + "&comment=" + encodeURIComponent(text)
+      + "&email=" + encodeURIComponent(email),
       function (data){
         var comments = data.comments;
         $("#comment_" + post_id).empty();
@@ -73,7 +76,24 @@ $(function () {
             $head.append(" ");
             $head.append($delete);
           }
-          var $text = $('<p/>').text(e.text);         
+          else{
+            var $reply = $('<button/>', {
+                "class": "btn btn-default btn-comment-reply btn-xs",
+                email: e.user.email,
+                name: e.user.name,
+                id: post_id,
+                text: "reply"
+            });
+            $head.append(" ");
+            $head.append($reply);
+          }
+          var $text;
+          if (jQuery.isEmptyObject(e.refer)){
+            $text = $('<pre/>').text(e.text); 
+          }
+          else{
+            $text = $('<pre/>').text("@" + e.refer.name + ": " + e.text); 
+          }       
           var $body = $('<div/>')
                        .addClass("comment-body")
                        .append($head)
@@ -125,7 +145,24 @@ $(function () {
             $head.append(" ");
             $head.append($delete);
           }
-          var $text = $('<p/>').text(e.text);         
+          else{
+            var $reply = $('<button/>', {
+                "class": "btn btn-default btn-comment-reply btn-xs",
+                email: e.user.email,
+                name: e.user.name,
+                id: post_id,
+                text: "reply"
+            });
+            $head.append(" ");
+            $head.append($reply);
+          }
+          var $text;
+          if (jQuery.isEmptyObject(e.refer)){
+            $text = $('<pre/>').text(e.text); 
+          }
+          else{
+            $text = $('<pre/>').text("@" + e.refer.name + ": " + e.text); 
+          }       
           var $body = $('<div/>')
                        .addClass("comment-body")
                        .append($head)
@@ -139,12 +176,32 @@ $(function () {
         });
       }, "json");
   });
+  $(".panel-footer").on("click", '.btn-comment-reply', function(){
+    var email = $(this).attr('email');
+    var name = $(this).attr('name');
+    var $panel = $(this).closest('.panel-google-plus');
+    var $comment = $panel.find('.panel-google-plus-comment');
+        
+    $comment.find('.btn:first-child').addClass('disabled');
+    $comment.find('textarea').val('');
+    $comment.find('textarea').attr("placeholder", "@" + name);
+    $comment.find('button[type="submit"]').attr("email", email);
+    
+    if ($panel.hasClass('panel-google-plus-show-comment')) {
+      $comment.find('textarea').focus();
+    }
+    else{
+      $panel.toggleClass('panel-google-plus-show-comment');
+    }
+  });
   $('.panel-google-plus > .panel-footer > .input-placeholder, .panel-google-plus > .panel-google-plus-comment > .panel-google-plus-textarea > button[type="reset"]').on('click', function(event) {
     var $panel = $(this).closest('.panel-google-plus');
     var $comment = $panel.find('.panel-google-plus-comment');
         
     $comment.find('.btn:first-child').addClass('disabled');
     $comment.find('textarea').val('');
+    $comment.find('textarea').attr("placeholder", "");
+    $comment.find('button[type="submit"]').attr("email", "");
     
     $panel.toggleClass('panel-google-plus-show-comment');
     

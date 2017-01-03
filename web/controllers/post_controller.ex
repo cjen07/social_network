@@ -34,7 +34,8 @@ defmodule SocialNetwork.PostController do
 
       cypher = """
         MATCH (a:Post {id: #{id}})<-[:POINTS_TO]-(b:Comment)-[:BELONGS_TO]->(c:User)
-        RETURN b As comment, c As user
+        OPTIONAL MATCH (b)-[:REFERS_TO]->(d:User)
+        RETURN b AS comment, c AS user, d AS refer
         ORDER BY b.time
       """
 
@@ -46,7 +47,19 @@ defmodule SocialNetwork.PostController do
       thumbs = result
       comments = result1 |> Enum.map(fn x -> (x["comment"]).properties end)
       users = result1 |> Enum.map(fn x -> (x["user"]).properties end)
-      comments = Enum.zip(comments, users) |> Enum.map(fn {c, u} -> Map.put(c, "user", u) end)
+      refers = result1 |> Enum.map(fn x -> 
+          refer = x["refer"]
+          case refer do
+            nil -> %{}
+            _ -> refer.properties            
+          end
+        end)
+
+      comments = 
+        Enum.zip(comments, users) 
+        |> Enum.map(fn {c, u} -> Map.put(c, "user", u) end)
+        |> Enum.zip(refers)
+        |> Enum.map(fn {c, r} -> Map.put(c, "refer", r) end)
 
       x 
       |> Map.put("thumbs", :erlang.term_to_binary(thumbs))
@@ -106,7 +119,8 @@ defmodule SocialNetwork.PostController do
 
       cypher = """
         MATCH (a:Post {id: #{id}})<-[:POINTS_TO]-(b:Comment)-[:BELONGS_TO]->(c:User)
-        RETURN b As comment, c As user
+        OPTIONAL MATCH (b)-[:REFERS_TO]->(d:User)
+        RETURN b AS comment, c AS user, d AS refer
         ORDER BY b.time
       """
 
@@ -118,7 +132,19 @@ defmodule SocialNetwork.PostController do
       thumbs = result
       comments = result1 |> Enum.map(fn x -> (x["comment"]).properties end)
       users = result1 |> Enum.map(fn x -> (x["user"]).properties end)
-      comments = Enum.zip(comments, users) |> Enum.map(fn {c, u} -> Map.put(c, "user", u) end)
+      refers = result1 |> Enum.map(fn x -> 
+          refer = x["refer"]
+          case refer do
+            nil -> %{}
+            _ -> refer.properties            
+          end
+        end)
+
+      comments = 
+        Enum.zip(comments, users) 
+        |> Enum.map(fn {c, u} -> Map.put(c, "user", u) end)
+        |> Enum.zip(refers)
+        |> Enum.map(fn {c, r} -> Map.put(c, "refer", r) end)
 
       x 
       |> Map.put("thumbs", :erlang.term_to_binary(thumbs))
@@ -183,7 +209,8 @@ defmodule SocialNetwork.PostController do
 
       cypher = """
         MATCH (a:Post {id: #{id}})<-[:POINTS_TO]-(b:Comment)-[:BELONGS_TO]->(c:User)
-        RETURN b As comment, c As user
+        OPTIONAL MATCH (b)-[:REFERS_TO]->(d:User)
+        RETURN b AS comment, c AS user, d AS refer
         ORDER BY b.time
       """
 
@@ -195,7 +222,19 @@ defmodule SocialNetwork.PostController do
       thumbs = result
       comments = result1 |> Enum.map(fn x -> (x["comment"]).properties end)
       users = result1 |> Enum.map(fn x -> (x["user"]).properties end)
-      comments = Enum.zip(comments, users) |> Enum.map(fn {c, u} -> Map.put(c, "user", u) end)
+      refers = result1 |> Enum.map(fn x -> 
+          refer = x["refer"]
+          case refer do
+            nil -> %{}
+            _ -> refer.properties            
+          end
+        end)
+
+      comments = 
+        Enum.zip(comments, users) 
+        |> Enum.map(fn {c, u} -> Map.put(c, "user", u) end)
+        |> Enum.zip(refers)
+        |> Enum.map(fn {c, r} -> Map.put(c, "refer", r) end)
 
       x 
       |> Map.put("thumbs", :erlang.term_to_binary(thumbs))
@@ -352,7 +391,7 @@ defmodule SocialNetwork.PostController do
 
   end
 
-  def create_comment(conn, %{"post_id" => post_id, "comment" => comment}) do
+  def create_comment(conn, %{"post_id" => post_id, "comment" => comment, "email" => email0}) do
     
     Logger.info "here is post_id"
     Logger.debug "#{inspect(post_id)}"
@@ -360,17 +399,32 @@ defmodule SocialNetwork.PostController do
     Logger.info "here is comment"
     Logger.debug "#{inspect(comment)}"
 
+    Logger.info "here is email0"
+    Logger.debug "#{inspect(email0)}"
+
     user = Coherence.current_user(conn)
     email = user.email
 
     id = String.to_integer(post_id)
     time = DateTime.utc_now() |> DateTime.to_unix()
 
-    cypher = """
-      MATCH (a:Post {id: #{id}}), (c:User {email: '#{email}'})
-      CREATE (a)<-[:POINTS_TO]-(b:Comment {text: "#{comment}", time: #{time}})-[:BELONGS_TO]->(c)
-      RETURN b
-    """
+    cypher = 
+    case email0 do
+      "" -> 
+        """
+          MATCH (a:Post {id: #{id}}), (c:User {email: '#{email}'})
+          CREATE (a)<-[:POINTS_TO]-(b:Comment {text: "#{comment}", time: #{time}})-[:BELONGS_TO]->(c)
+          RETURN b
+        """
+      _ ->
+        """
+          MATCH (a:Post {id: #{id}}), (c:User {email: '#{email}'}), (d:User {email: '#{email0}'})
+          CREATE (a)<-[:POINTS_TO]-(b:Comment {text: "#{comment}", time: #{time}})-[:BELONGS_TO]->(c)
+          CREATE (b)-[:REFERS_TO]->(d)
+          RETURN b
+        """
+    end
+
     result = Bolt.query!(Bolt.conn, cypher)
 
     Logger.info "here is created comment result"
@@ -378,7 +432,8 @@ defmodule SocialNetwork.PostController do
 
     cypher = """
       MATCH (a:Post {id: #{id}})<-[:POINTS_TO]-(b:Comment)-[:BELONGS_TO]->(c:User)
-      RETURN b As comment, c As user
+      OPTIONAL MATCH (b)-[:REFERS_TO]->(d:User)
+      RETURN b AS comment, c AS user, d AS refer
       ORDER BY b.time
     """
 
@@ -387,11 +442,22 @@ defmodule SocialNetwork.PostController do
     Logger.info "here is all comments result1"
     Logger.debug "#{inspect(result1)}"
 
+    thumbs = result
     comments = result1 |> Enum.map(fn x -> (x["comment"]).properties end)
     users = result1 |> Enum.map(fn x -> (x["user"]).properties end)
+    refers = result1 |> Enum.map(fn x -> 
+        refer = x["refer"]
+        case refer do
+          nil -> %{}
+          _ -> refer.properties            
+        end
+      end)
+
     comments = 
       Enum.zip(comments, users) 
       |> Enum.map(fn {c, u} -> Map.put(c, "user", u) end)
+      |> Enum.zip(refers)
+      |> Enum.map(fn {c, r} -> Map.put(c, "refer", r) end)
       |> Enum.map(fn c -> Map.put(c, "self", c["user"]["email"] == Coherence.current_user(conn).email) end)
 
     render(conn, "comment.json", comments: comments)
@@ -422,7 +488,8 @@ defmodule SocialNetwork.PostController do
 
     cypher = """
       MATCH (a:Post {id: #{id}})<-[:POINTS_TO]-(b:Comment)-[:BELONGS_TO]->(c:User)
-      RETURN b As comment, c As user
+      OPTIONAL MATCH (b)-[:REFERS_TO]->(d:User)
+      RETURN b AS comment, c AS user, d AS refer
       ORDER BY b.time
     """
 
@@ -431,11 +498,22 @@ defmodule SocialNetwork.PostController do
     Logger.info "here is all comments result1"
     Logger.debug "#{inspect(result1)}"
 
+    thumbs = result
     comments = result1 |> Enum.map(fn x -> (x["comment"]).properties end)
     users = result1 |> Enum.map(fn x -> (x["user"]).properties end)
+    refers = result1 |> Enum.map(fn x -> 
+        refer = x["refer"]
+        case refer do
+          nil -> %{}
+          _ -> refer.properties            
+        end
+      end)
+
     comments = 
       Enum.zip(comments, users) 
       |> Enum.map(fn {c, u} -> Map.put(c, "user", u) end)
+      |> Enum.zip(refers)
+      |> Enum.map(fn {c, r} -> Map.put(c, "refer", r) end)
       |> Enum.map(fn c -> Map.put(c, "self", c["user"]["email"] == Coherence.current_user(conn).email) end)
 
     render(conn, "comment.json", comments: comments)

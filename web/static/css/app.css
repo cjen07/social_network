@@ -221,17 +221,19 @@ a.navbar-form {
   margin-left: 50px;
 }
 
-.comment .comment-body p {
+.comment .comment-body pre {
+  font-family: 'Roboto', sans-serif;
+  margin-top: 10px;
   font-size: 14px;
   font-weight: 400;
-}
-
-.comment > {
-  margin-left: 50px;
 }
 
 /*comment-delete btn*/
 
 .btn-comment-delete {
+  font-size: 11px;
+}
+
+.btn-comment-reply {
   font-size: 11px;
 }
