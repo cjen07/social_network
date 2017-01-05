@@ -82,7 +82,8 @@ defmodule SocialNetwork.Coherence.SessionController do
           |> reset_failed_attempts(user, lockable?)
           |> track_login(user, user_schema.trackable?)
           |> save_rememberable(user, remember)
-          |> put_flash(:notice, "Signed in successfully.")
+          |> assign(:current_user, user)
+          |> put_flash(:info, "Signed in successfully.")
           |> redirect_to(:session_create, params)
         else
           conn

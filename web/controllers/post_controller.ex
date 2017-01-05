@@ -262,8 +262,9 @@ defmodule SocialNetwork.PostController do
     Logger.debug "#{inspect(post)}"
 
     cypher = """
-      MATCH (id:Id {name:'post'})
-      SET id.count = id.count + 1
+      MERGE (id:Id {name:'post'})
+      ON CREATE SET id.count = 0
+      ON MATCH SET id.count = id.count + 1
       RETURN id.count as id
     """
     id = Bolt.query!(Bolt.conn, cypher) |> Enum.at(0) |> Map.get("id")
@@ -442,7 +443,6 @@ defmodule SocialNetwork.PostController do
     Logger.info "here is all comments result1"
     Logger.debug "#{inspect(result1)}"
 
-    thumbs = result
     comments = result1 |> Enum.map(fn x -> (x["comment"]).properties end)
     users = result1 |> Enum.map(fn x -> (x["user"]).properties end)
     refers = result1 |> Enum.map(fn x -> 
@@ -498,7 +498,6 @@ defmodule SocialNetwork.PostController do
     Logger.info "here is all comments result1"
     Logger.debug "#{inspect(result1)}"
 
-    thumbs = result
     comments = result1 |> Enum.map(fn x -> (x["comment"]).properties end)
     users = result1 |> Enum.map(fn x -> (x["user"]).properties end)
     refers = result1 |> Enum.map(fn x -> 

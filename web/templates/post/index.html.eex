@@ -33,7 +33,8 @@
   <% end %>
 <% else %>
   <%= if @type == "1" do %>
-    <h2><%= @user["name"] <> "'s" %> Posts</h2>
+    <% email = @user["email"] %>
+    <h2 class="userChannel" email="<%= email %>"><%= @user["name"] <> "'s" %> Posts</h2>
   <% else %>
     <h2>Your Friends' Posts</h2>
   <% end %>

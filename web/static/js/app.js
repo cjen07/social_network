@@ -18,14 +18,10 @@ import "phoenix_html"
 // Local files can be imported directly using relative
 // paths "./socket" or full ones "web/static/js/socket".
 
-// import socket from "./socket"
+import socket from "./socket"
+import self from "./self"
+import user from "./user"
 
-// class App {
-//   static init() {
-//     console.log("Initialized")
-//   }
-// }
+self.init(socket, $(".selfChannel"))
+user.init(socket, $(".userChannel"))
 
-// $( () => App.init() )
-
-// export default App

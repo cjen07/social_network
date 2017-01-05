@@ -20,7 +20,8 @@
       <header class="header" style="padding-top: 15px">
         <%= if Coherence.current_user(@conn) do %>
           <nav role="navigation">
-            <ul class="nav nav-pills pull-left" style="margin-top: -1.7px">
+            <% email = Coherence.current_user(@conn).email %>
+            <ul class="nav nav-pills pull-left selfChannel" style="margin-top: -1.7px" email="<%= email %>">
               <li><a href="/home">Home</a></li>
               <li><a href="/users">Friends</a></li>
               <li><a href="/news">News</a></li>
@@ -45,7 +46,9 @@
       </main>
 
     </div> <!-- /container -->
+    <script>window.userToken = "<%= assigns[:user_token] %>";</script>
     <script src="<%= static_path(@conn, "/js/app.js") %>"></script>
+    
     <%# <script type="text/javascript">
       window.onload = function(){ document.getElementById("hideAll").style.display = "none"; }
     </script>  %>

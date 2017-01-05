@@ -18,6 +18,7 @@ defmodule SocialNetwork.Router do
     plug :protect_from_forgery
     plug :put_secure_browser_headers
     plug Coherence.Authentication.Session, protected: true
+    plug :put_user_token
   end
 
   pipeline :api do
@@ -65,5 +66,14 @@ defmodule SocialNetwork.Router do
     get "/thumb", PostController, :thumb
     get "/comment/create", PostController, :create_comment
     get "/comment/delete", PostController, :delete_comment
+  end
+
+  defp put_user_token(conn, _) do
+    if current_user = conn.assigns[:current_user] do
+      token = Phoenix.Token.sign(conn, "user socket", current_user.email)
+      assign(conn, :user_token, token)
+    else
+      conn
+    end
   end
 end
