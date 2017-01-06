@@ -7,10 +7,11 @@ To setup
   
 To config
 
-  * postgresql in config/dev.exs
-  * mailgun in config/config.exs
-  * arc in config/config.exs
-  * neo4j/bolt in config/config.exs  
+  * postgresql: config/dev.exs, set `alter user postgres with password 'postgres';`for first time users in database command line
+  * email: config/config.exs, using different adapters see [here](https://github.com/smpallen99/coherence#configuring-the-swoosh-email-adapter), currently using my mailgun sandbox
+  * arc: config/config.exs, using cloud storage see [here](https://github.com/stavro/arc), currently using local storage
+  * neo4j/bolt: config/config.exs, to reset neo4j password with command line: [here](http://430.io/change-neo4j-default-password-in-command-line/)
+  * localhost: config/config.exs, in endpoint configue: `url: [host: "localhost"]`
 
 To start your Phoenix app:
 
@@ -23,9 +24,16 @@ To start your Phoenix app:
 Feature
 
   * one comment can only be referred to one comment at one time using reply button
+  * message notification: friends' homepage notification is done
+  * exception handling: comment or thumb on deleted post is prevented
   
 To be done
 
-  * message notification
+  * message notification 
   * exception handling
-  * private online chat (optional)
+  
+Bug to fix
+  
+  * large image upload failure
+  * user deleted misbehaviour
+
