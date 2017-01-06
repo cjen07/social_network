@@ -5,6 +5,10 @@ $(function () {
     var span_id = $("#" + post_id + ' > .glyphicon').attr('id');
     $.get("/api/thumb?post_id=" + post_id + "&span_id=" + span_id,
       function (data){
+        if (data.error){
+          alert(data.error);
+          return;
+        }
         $("#" + post_id).empty();
         if (data.thumb) {
           $("#" + post_id).append("<span id='0' class='glyphicon glyphicon-heart glyphicon-btn'></span>");
@@ -44,6 +48,10 @@ $(function () {
       + "&comment=" + encodeURIComponent(text)
       + "&email=" + encodeURIComponent(email),
       function (data){
+        if (data.error){
+          alert(data.error);
+          return;
+        }
         var comments = data.comments;
         $("#comment_" + post_id).empty();
         comments.forEach(function (e){
@@ -113,6 +121,10 @@ $(function () {
     var time = $(this).attr('time');
     $.get("/api/comment/delete?post_id=" + post_id + "&time=" + time,
       function (data){
+        if (data.error){
+          alert(data.error);
+          return;
+        }
         var comments = data.comments;
         $("#comment_" + post_id).empty();
         comments.forEach(function (e){

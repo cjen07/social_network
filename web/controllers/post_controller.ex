@@ -292,6 +292,8 @@ defmodule SocialNetwork.PostController do
     Logger.info "here is created result"
     Logger.debug "#{inspect(result)}"
 
+    SocialNetwork.Endpoint.broadcast("user:" <> email, "new_post", %{body: "new post"})
+
     conn
     |> put_flash(:info, "Post created successfully.")
     |> redirect(to: post_path(conn, :index))
@@ -325,6 +327,9 @@ defmodule SocialNetwork.PostController do
     if post["has_image"] == "true" do
       File.rm_rf("./priv/static/uploads/posts/" <> "#{id}")
     end
+
+    email = Coherence.current_user(conn).email
+    SocialNetwork.Endpoint.broadcast("user:" <> email, "delete_post", %{body: "new post", post_id: id})
 
     conn
     |> put_flash(:info, "Post deleted successfully.")
@@ -360,35 +365,43 @@ defmodule SocialNetwork.PostController do
     Logger.info "here is result"
     Logger.debug "#{inspect(result)}"
 
-    cypher = """
-      MATCH (a:Post {id: #{id}})<-[b:THUMBED]-(c:User)
-      RETURN c
-      ORDER BY b.time
-    """
-    result = Bolt.query!(Bolt.conn, cypher) |> Enum.map(fn x -> (x["c"]).properties end)
+    if result == [] or (span_id == "0" and Map.get(result, :stats) == nil) do
 
-    Logger.info "here is thumbed result"
-    Logger.debug "#{inspect(result)}"
+      render(conn, "thumb.json", error: "the post is deleted")
+      
+    else
 
-    result1 = Enum.map(result, fn x ->
-      Map.put(x, "self", x["email"] == email)
-    end)
+      cypher = """
+        MATCH (a:Post {id: #{id}})<-[b:THUMBED]-(c:User)
+        RETURN c
+        ORDER BY b.time
+      """
+      result = Bolt.query!(Bolt.conn, cypher) |> Enum.map(fn x -> (x["c"]).properties end)
 
-    thumbs = result1
+      Logger.info "here is thumbed result"
+      Logger.debug "#{inspect(result)}"
 
-    cypher = """
-      MATCH (a:Post {id: #{id}})
-      RETURN a.has_image AS b
-    """
+      result1 = Enum.map(result, fn x ->
+        Map.put(x, "self", x["email"] == email)
+      end)
 
-    result2 = Bolt.query!(Bolt.conn, cypher) |> Enum.at(0)
+      thumbs = result1
 
-    Logger.info "here is result2"
-    Logger.debug "#{inspect(result2)}"
+      cypher = """
+        MATCH (a:Post {id: #{id}})
+        RETURN a.has_image AS b
+      """
 
-    has_image = result2["b"]
+      result2 = Bolt.query!(Bolt.conn, cypher) |> Enum.at(0)
 
-    render(conn, "thumb.json", thumb: (span_id == "1"), thumbs: thumbs, has_image: has_image)    
+      Logger.info "here is result2"
+      Logger.debug "#{inspect(result2)}"
+
+      has_image = result2["b"]
+
+      render(conn, "thumb.json", thumb: (span_id == "1"), thumbs: thumbs, has_image: has_image)
+
+    end    
 
   end
 
@@ -431,36 +444,44 @@ defmodule SocialNetwork.PostController do
     Logger.info "here is created comment result"
     Logger.debug "#{inspect(result)}"
 
-    cypher = """
-      MATCH (a:Post {id: #{id}})<-[:POINTS_TO]-(b:Comment)-[:BELONGS_TO]->(c:User)
-      OPTIONAL MATCH (b)-[:REFERS_TO]->(d:User)
-      RETURN b AS comment, c AS user, d AS refer
-      ORDER BY b.time
-    """
+    if result == [] do
 
-    result1 = Bolt.query!(Bolt.conn, cypher)
+      render(conn, "comment.json", error: "the post is deleted")
+      
+    else
 
-    Logger.info "here is all comments result1"
-    Logger.debug "#{inspect(result1)}"
+      cypher = """
+        MATCH (a:Post {id: #{id}})<-[:POINTS_TO]-(b:Comment)-[:BELONGS_TO]->(c:User)
+        OPTIONAL MATCH (b)-[:REFERS_TO]->(d:User)
+        RETURN b AS comment, c AS user, d AS refer
+        ORDER BY b.time
+      """
 
-    comments = result1 |> Enum.map(fn x -> (x["comment"]).properties end)
-    users = result1 |> Enum.map(fn x -> (x["user"]).properties end)
-    refers = result1 |> Enum.map(fn x -> 
-        refer = x["refer"]
-        case refer do
-          nil -> %{}
-          _ -> refer.properties            
-        end
-      end)
+      result1 = Bolt.query!(Bolt.conn, cypher)
 
-    comments = 
-      Enum.zip(comments, users) 
-      |> Enum.map(fn {c, u} -> Map.put(c, "user", u) end)
-      |> Enum.zip(refers)
-      |> Enum.map(fn {c, r} -> Map.put(c, "refer", r) end)
-      |> Enum.map(fn c -> Map.put(c, "self", c["user"]["email"] == Coherence.current_user(conn).email) end)
+      Logger.info "here is all comments result1"
+      Logger.debug "#{inspect(result1)}"
 
-    render(conn, "comment.json", comments: comments)
+      comments = result1 |> Enum.map(fn x -> (x["comment"]).properties end)
+      users = result1 |> Enum.map(fn x -> (x["user"]).properties end)
+      refers = result1 |> Enum.map(fn x -> 
+          refer = x["refer"]
+          case refer do
+            nil -> %{}
+            _ -> refer.properties            
+          end
+        end)
+
+      comments = 
+        Enum.zip(comments, users) 
+        |> Enum.map(fn {c, u} -> Map.put(c, "user", u) end)
+        |> Enum.zip(refers)
+        |> Enum.map(fn {c, r} -> Map.put(c, "refer", r) end)
+        |> Enum.map(fn c -> Map.put(c, "self", c["user"]["email"] == Coherence.current_user(conn).email) end)
+
+      render(conn, "comment.json", comments: comments)
+
+    end
   end
 
   def delete_comment(conn, %{"post_id" => post_id, "time" => time}) do
@@ -486,36 +507,44 @@ defmodule SocialNetwork.PostController do
     Logger.info "here is created comment result"
     Logger.debug "#{inspect(result)}"
 
-    cypher = """
-      MATCH (a:Post {id: #{id}})<-[:POINTS_TO]-(b:Comment)-[:BELONGS_TO]->(c:User)
-      OPTIONAL MATCH (b)-[:REFERS_TO]->(d:User)
-      RETURN b AS comment, c AS user, d AS refer
-      ORDER BY b.time
-    """
+    if Map.get(result, :stats) == nil do
 
-    result1 = Bolt.query!(Bolt.conn, cypher)
+      render(conn, "comment.json", error: "the post is deleted")
+      
+    else
 
-    Logger.info "here is all comments result1"
-    Logger.debug "#{inspect(result1)}"
+      cypher = """
+        MATCH (a:Post {id: #{id}})<-[:POINTS_TO]-(b:Comment)-[:BELONGS_TO]->(c:User)
+        OPTIONAL MATCH (b)-[:REFERS_TO]->(d:User)
+        RETURN b AS comment, c AS user, d AS refer
+        ORDER BY b.time
+      """
 
-    comments = result1 |> Enum.map(fn x -> (x["comment"]).properties end)
-    users = result1 |> Enum.map(fn x -> (x["user"]).properties end)
-    refers = result1 |> Enum.map(fn x -> 
-        refer = x["refer"]
-        case refer do
-          nil -> %{}
-          _ -> refer.properties            
-        end
-      end)
+      result1 = Bolt.query!(Bolt.conn, cypher)
 
-    comments = 
-      Enum.zip(comments, users) 
-      |> Enum.map(fn {c, u} -> Map.put(c, "user", u) end)
-      |> Enum.zip(refers)
-      |> Enum.map(fn {c, r} -> Map.put(c, "refer", r) end)
-      |> Enum.map(fn c -> Map.put(c, "self", c["user"]["email"] == Coherence.current_user(conn).email) end)
+      Logger.info "here is all comments result1"
+      Logger.debug "#{inspect(result1)}"
 
-    render(conn, "comment.json", comments: comments)
+      comments = result1 |> Enum.map(fn x -> (x["comment"]).properties end)
+      users = result1 |> Enum.map(fn x -> (x["user"]).properties end)
+      refers = result1 |> Enum.map(fn x -> 
+          refer = x["refer"]
+          case refer do
+            nil -> %{}
+            _ -> refer.properties            
+          end
+        end)
+
+      comments = 
+        Enum.zip(comments, users) 
+        |> Enum.map(fn {c, u} -> Map.put(c, "user", u) end)
+        |> Enum.zip(refers)
+        |> Enum.map(fn {c, r} -> Map.put(c, "refer", r) end)
+        |> Enum.map(fn c -> Map.put(c, "self", c["user"]["email"] == Coherence.current_user(conn).email) end)
+
+      render(conn, "comment.json", comments: comments)
+
+    end
     
   end
 
