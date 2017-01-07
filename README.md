@@ -34,6 +34,6 @@ To be done
   
 Bug to fix
   
-  * large image upload failure
+  * large image upload failure and image upload preview cannot be refixed
   * user deleted misbehaviour
 
