@@ -13,7 +13,8 @@ let self = {
     $.get("/api/friends",
       function (data){
         let friends = data.friends
-        let element = $(".usersChannel")
+        let user = $(".userChannel")
+        let users = $(".usersChannel")
         let get_friends = e => {
           let email = e.email
           let name = e.name
@@ -23,7 +24,7 @@ let self = {
             .receive("error", reason => console.log("join " + name + " channel failed", reason) )
           return friendChannel
         }
-        if (!element.length){
+        if (!users.length){
           friends.forEach(get_friends)
         }
         else{
@@ -32,6 +33,17 @@ let self = {
             friendChannel.on("new_post", response.new_post)
             friendChannel.on("delete_post", response.delete_post)
           })
+        }
+        if (user.length){
+          let email = user.attr('email')
+          let userChannel   = socket.channel("user:" + email)
+          if (!friends.find(e => e.email == email)){
+            userChannel.join()
+              .receive("ok", resp => console.log("joined a stranger channel", resp) )
+              .receive("error", reason => console.log("join a stranger channel failed", reason) )
+          }
+          userChannel.on("new_post", response.new_post)
+          userChannel.on("delete_post", response.delete_post)
         }
       }, "json")
   }

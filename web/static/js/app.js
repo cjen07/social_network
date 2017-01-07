@@ -20,7 +20,5 @@ import "phoenix_html"
 
 import socket from "./socket"
 import self from "./self"
-import user from "./user"
 
 self.init(socket, $(".selfChannel"))
-user.init(socket, $(".userChannel"))
