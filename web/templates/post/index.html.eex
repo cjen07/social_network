@@ -36,7 +36,7 @@
     <% email = @user["email"] %>
     <h2 class="userChannel" email="<%= email %>"><%= @user["name"] <> "'s" %> Posts</h2>
   <% else %>
-    <h2>Your Friends' Posts</h2>
+    <h2 class="usersChannel" >Your Friends' Posts</h2>
   <% end %>
 <% end %>
 

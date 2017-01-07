@@ -28,6 +28,26 @@ defmodule SocialNetwork.UserController do
 
   end
 
+  def get_friends(conn, _params) do
+
+    user = Coherence.current_user(conn)
+
+    Logger.info  "Here is the user."
+    username = user.name
+    email = user.email
+    Logger.debug "#{inspect(username)} and #{inspect(email)}"
+    cypher = """
+      MATCH (a:User {email: '#{email}'})-[:FOLLOWS]->(b)
+      RETURN b
+    """
+    result = Bolt.query!(Bolt.conn, cypher) |> Enum.map(fn x -> (x["b"]).properties end)
+    Logger.info "Here is the result."
+    Logger.debug "#{inspect(result)}"
+
+    friends = result
+    render(conn, "friends.json", friends: friends)
+  end
+
   def search_form(conn, %{"fof" => fof, "now" => now}) do
     Logger.info "Here is the fof."
     Logger.debug "#{inspect(fof)}"
@@ -231,4 +251,5 @@ defmodule SocialNetwork.UserController do
     end
 
   end
+
 end

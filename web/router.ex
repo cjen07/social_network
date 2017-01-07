@@ -66,6 +66,7 @@ defmodule SocialNetwork.Router do
     get "/thumb", PostController, :thumb
     get "/comment/create", PostController, :create_comment
     get "/comment/delete", PostController, :delete_comment
+    get "/friends", UserController, :get_friends
   end
 
   defp put_user_token(conn, _) do
@@ -76,4 +77,5 @@ defmodule SocialNetwork.Router do
       conn
     end
   end
+
 end

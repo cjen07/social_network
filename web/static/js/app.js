@@ -24,4 +24,3 @@ import user from "./user"
 
 self.init(socket, $(".selfChannel"))
 user.init(socket, $(".userChannel"))
-
