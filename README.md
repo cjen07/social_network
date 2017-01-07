@@ -24,7 +24,7 @@ To start your Phoenix app:
 Feature
 
   * one comment can only be referred to one comment at one time using reply button
-  * message notification: friends' homepage notification is done
+  * message notification: post create or delete notification in friends homepage and news page
   * exception handling: comment or thumb on deleted post is prevented
   
 To be done
