@@ -9,6 +9,13 @@ let self = {
     myChannel.join()
       .receive("ok", resp => console.log("joined my channel", resp) )
       .receive("error", reason => console.log("join my channel failed", reason) )
+    let me = $(".myChannel")
+    if (me.length){
+      myChannel.on("new_comment", response.new_comment)
+      myChannel.on("delete_comment", response.delete_comment)
+      myChannel.on("new_post", response.warning)
+      myChannel.on("delete_post", response.warning)
+    }
 
     $.get("/api/friends",
       function (data){

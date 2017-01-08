@@ -1,5 +1,5 @@
 <%= if @type == "0" do %>
-  <h2>Your Posts</h2>
+  <h2 class="myChannel" >Your Posts</h2>
   <%= form_for @conn, post_path(@conn, :create_post), [multipart: true, as: :post], fn f -> %>
 
     <div class="form-group">
@@ -42,7 +42,8 @@
 
 
 <%= for post <- @posts do %>
-  <div class="panel panel-default panel-google-plus">
+  <% post_id = post["id"] %>
+  <div class="panel panel-default panel-google-plus" id="<%= post_id %>">
       <div class="panel-heading">
         <%= if @type == "2" do %>
           <% user = post["user"] %>
@@ -57,7 +58,6 @@
         <%= if @type == "0" do %>
           <%= link "Delete", to: post_path(@conn, :delete_post, post), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-danger btn-xs" %>
         <% else %>
-          <% post_id = post["id"] %>
           <button type="button" class="btn-heart btn btn-default btn-xs" id="<%= post_id %>">
             <%= if post["thumbed"] do %>
               <span id="0" class="glyphicon glyphicon-heart glyphicon-btn"></span>
@@ -75,7 +75,6 @@
             </a>
           <% end %>
           <% thumbs = :erlang.binary_to_term(post["thumbs"]) %>
-          <% post_id = post["id"] %>
           <span id="thumb_<%= post_id %>">
             <%= if length(thumbs) != 0 do %>
               <%= if post["has_image"] do %>
@@ -94,7 +93,6 @@
       </div>
       <div class="panel-footer">
         <% comments = :erlang.binary_to_term(post["comments"]) %>
-        <% post_id = post["id"] %>
         <span id="comment_<%= post_id %>">
           <%= for piece <- comments do %>
             <% user = piece["user"] %>
@@ -110,11 +108,12 @@
                           <% time = piece["time"] %>
                           <button class="btn btn-default btn-comment-delete btn-xs" time="<%= time %>" id="<%= post_id %>">delete</button>
                         <% else %>
-                          <% 
+                          <%
+                            time = piece["time"]
                             email = user["email"]
                             name = user["name"]
                           %>
-                          <button class="btn btn-default btn-comment-reply btn-xs" name="<%= name %>" email="<%= email %>" id="<%= post_id %>">reply</button>
+                          <button class="btn btn-default btn-comment-reply btn-xs" time="<%= time %>" name="<%= name %>" email="<%= email %>" id="<%= post_id %>">reply</button>
                         <% end %>
                     </div>
                     <%= if piece["refer"] == %{} do %>
@@ -133,7 +132,6 @@
           <%= img_tag(Exgravatar.gravatar_url(Coherence.current_user(@conn).email, secure: false, s: 50), class: "img-circle", alt: "User Image")%>
           <div class="panel-google-plus-textarea">
               <textarea rows="4"></textarea>
-              <% post_id = post["id"] %>
               <button type="submit" class="btn btn-success btn-comment-create disabled" id="<%= post_id %>">Post comment</button>
               <button type="reset" class="btn btn-default">Cancel</button>
           </div>

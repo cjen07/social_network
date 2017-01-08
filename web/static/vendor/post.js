@@ -1,4 +1,8 @@
 $(function () {
+  if ( sessionStorage.getItem("warning") == "true" ) {
+    $(".alert-warning").text("updated by another endpoint")
+    sessionStorage.setItem("warning", "false");
+  }
   $('.btn-heart').click(function(){
     $(this).blur();
     var post_id = $(this).attr('id');
@@ -89,6 +93,7 @@ $(function () {
                 "class": "btn btn-default btn-comment-reply btn-xs",
                 email: e.user.email,
                 name: e.user.name,
+                time: e.time,
                 id: post_id,
                 text: "reply"
             });
@@ -162,6 +167,7 @@ $(function () {
                 "class": "btn btn-default btn-comment-reply btn-xs",
                 email: e.user.email,
                 name: e.user.name,
+                time: e.time,
                 id: post_id,
                 text: "reply"
             });

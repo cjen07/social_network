@@ -237,3 +237,8 @@ a.navbar-form {
 .btn-comment-reply {
   font-size: 11px;
 }
+
+.comment-notification-list {
+  padding: 0;
+  list-style-type: none;
+}
