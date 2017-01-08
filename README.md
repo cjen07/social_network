@@ -25,7 +25,8 @@ Feature
 
   * one comment can only be referred to one comment at one time using reply button
   * message notification: post create or delete notification in friends (or strangers) homepage and news page
-  * exception handling: comment or thumb on deleted post is prevented
+  * message notification: homepage comment notification is done
+  * exception handling: comment or thumb on deleted post is prevented, re-delete post and comment is settled
   
 To be done
 
@@ -36,4 +37,5 @@ Bug to fix
   
   * large image upload failure and image upload preview cannot be refixed
   * user deleted misbehaviour
+  * unclear bolt_sip bug
 
