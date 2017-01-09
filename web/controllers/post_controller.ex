@@ -248,7 +248,7 @@ defmodule SocialNetwork.PostController do
     render(conn, "index.html", posts: posts, user: %{"name" => username, "email" => email}, type: "2")
   end
 
-  def create_post(conn, _params) do
+  def create_post(conn, %{"token_time" => token_time}) do
 
     user = Coherence.current_user(conn)
     email = user.email
@@ -292,14 +292,14 @@ defmodule SocialNetwork.PostController do
     Logger.info "here is created result"
     Logger.debug "#{inspect(result)}"
 
-    SocialNetwork.Endpoint.broadcast("user:" <> email, "new_post", %{})
+    SocialNetwork.Endpoint.broadcast("user:" <> email, "new_post", %{email: email, token_time: String.to_integer(token_time)})
 
     conn
     |> put_flash(:info, "Post created successfully.")
     |> redirect(to: post_path(conn, :index))
   end
 
-  def delete_post(conn, post) do
+  def delete_post(conn, %{"post" => post, "token_time" => token_time}) do
 
     Logger.info "here is the post"
     Logger.debug "#{inspect(post)}"
@@ -337,7 +337,7 @@ defmodule SocialNetwork.PostController do
       end
 
       email = Coherence.current_user(conn).email
-      SocialNetwork.Endpoint.broadcast("user:" <> email, "delete_post", %{post_id: id})
+      SocialNetwork.Endpoint.broadcast("user:" <> email, "delete_post", %{post_id: id, email: email, token_time: String.to_integer(token_time)})
 
       conn
       |> put_flash(:info, "Post deleted successfully.")
@@ -518,7 +518,7 @@ defmodule SocialNetwork.PostController do
 
         that_email = result0["email"]
 
-        if that_email != email, do: SocialNetwork.Endpoint.broadcast("user:" <> that_email, "new_comment", %{post_id: id})
+        if that_email != email, do: SocialNetwork.Endpoint.broadcast("user:" <> that_email, "new_comment", %{post_id: id, email: email, time: time})
 
       end
 

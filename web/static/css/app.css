@@ -242,3 +242,16 @@ a.navbar-form {
   padding: 0;
   list-style-type: none;
 }
+
+.button-badge {
+  background-color: #fa3e3e;
+  border-radius: 2px;
+  color: white;
+ 
+  padding: 1px 3px;
+  font-size: 10px;
+  
+  position: absolute; /* Position the badge within the relatively positioned button */
+  top: -2px;
+  right: 1px;
+}

@@ -136,6 +136,70 @@ let response = {
           .text(text + " in a post")
       }
     }
+  },
+
+  new_comment_delay(payload){
+    let id = payload.post_id
+    let email = payload.email
+    let time = payload.time
+    let home = $(".nav-home")
+    let counter = home.find(".button-badge")
+    if (!counter.length){
+      counter = $('<span/>')
+                  .addClass("button-badge")
+                  .text(1)
+      home.append(counter)
+      sessionStorage.setItem("home-flag", "true")
+      let m = {}
+      m[id] = [{email: email, time: time}]
+      sessionStorage.setItem("home-data", JSON.stringify(m))
+    }
+    else{
+      let count = Number.parseInt(counter.text()) + 1
+      counter.text(count)
+      let n = sessionStorage.getItem("home-data")
+      let m = $.parseJSON(n)
+      if (id in m){
+        let cs = m[id]
+        cs.push({email: email, time: time})
+        m[id] = cs
+        sessionStorage.setItem("home-data", JSON.stringify(m))
+      }
+      else{
+        m[id] = [{email: email, time: time}]
+        sessionStorage.setItem("home-data", JSON.stringify(m))
+      }
+    }
+  },
+
+  delete_comment_delay(payload){
+    let id = payload.post_id
+    let email = payload.email
+    let time = payload.time
+    let home = $(".nav-home")
+    let counter = home.find(".button-badge")
+    if (counter.length){
+      let n = sessionStorage.getItem("home-data")
+      let m = $.parseJSON(n)
+      if (id in m){
+        let cs = m[id]
+        let index = cs
+        .map(e => JSON.stringify(e))
+        .indexOf(JSON.stringify({email: email, time: time}))
+        if (index > -1) {
+          cs.splice(index, 1)
+          m[id] = cs
+          sessionStorage.setItem("home-data", JSON.stringify(m))
+          let count = Number.parseInt(counter.text()) - 1
+          if (count == 0) {
+            counter.remove()
+          }
+          else{
+            counter.text(count)
+          }
+        }
+      }
+    }
   }
 
 }

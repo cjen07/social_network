@@ -2,6 +2,8 @@ defmodule SocialNetwork.Router do
   use SocialNetwork.Web, :router
   use Coherence.Router
 
+  require Logger
+
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
@@ -64,7 +66,7 @@ defmodule SocialNetwork.Router do
     pipe_through :api
     pipe_through :protected
     get "/thumb", PostController, :thumb
-    get "comment/get", PostController, :get_comment
+    get "/comment/get", PostController, :get_comment
     get "/comment/create", PostController, :create_comment
     get "/comment/delete", PostController, :delete_comment
     get "/friends", UserController, :get_friends
@@ -72,8 +74,12 @@ defmodule SocialNetwork.Router do
 
   defp put_user_token(conn, _) do
     if current_user = conn.assigns[:current_user] do
-      token = Phoenix.Token.sign(conn, "user socket", current_user.email)
-      assign(conn, :user_token, token)
+      # this is a very tricky method
+      time = :rand.uniform(10000000000000000000)
+      token = Phoenix.Token.sign(conn, "user socket", {current_user.email, time})
+      conn
+      |> assign(:user_token, token)
+      |> assign(:token_time, time)
     else
       conn
     end

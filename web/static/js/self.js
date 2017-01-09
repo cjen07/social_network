@@ -16,6 +16,10 @@ let self = {
       myChannel.on("new_post", response.warning)
       myChannel.on("delete_post", response.warning)
     }
+    else{
+      myChannel.on("new_comment", response.new_comment_delay)
+      myChannel.on("delete_comment", response.delete_comment_delay)
+    }
 
     $.get("/api/friends",
       function (data){
@@ -53,6 +57,7 @@ let self = {
           userChannel.on("delete_post", response.delete_post)
         }
       }, "json")
+  
   }
 }
 export default self

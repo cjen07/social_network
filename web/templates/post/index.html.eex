@@ -1,6 +1,6 @@
 <%= if @type == "0" do %>
   <h2 class="myChannel" >Your Posts</h2>
-  <%= form_for @conn, post_path(@conn, :create_post), [multipart: true, as: :post], fn f -> %>
+  <%= form_for @conn, post_path(@conn, :create_post, %{:token_time => @conn.assigns[:token_time]}), [multipart: true, as: :post], fn f -> %>
 
     <div class="form-group">
       <%= label f, :text, class: "control-label" %>
@@ -56,7 +56,7 @@
       </div>
       <div class="panel-google-plus-button">
         <%= if @type == "0" do %>
-          <%= link "Delete", to: post_path(@conn, :delete_post, post), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-danger btn-xs" %>
+          <%= link "Delete", to: post_path(@conn, :delete_post, %{:post => post, :token_time => @conn.assigns[:token_time]}), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-danger btn-xs" %>
         <% else %>
           <button type="button" class="btn-heart btn btn-default btn-xs" id="<%= post_id %>">
             <%= if post["thumbed"] do %>

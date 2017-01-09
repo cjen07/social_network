@@ -1,6 +1,6 @@
 $(function () {
   if ( sessionStorage.getItem("warning") == "true" ) {
-    $(".alert-warning").text("updated by another endpoint")
+    $(".alert-warning").text("updated by another endpoint");
     sessionStorage.setItem("warning", "false");
   }
   $('.btn-heart').click(function(){
