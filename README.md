@@ -25,13 +25,14 @@ Feature
 
   * one comment can only be referred to one comment at one time using reply button
   * message notification: post create or delete notification in friends (or strangers) homepage and news page
-  * message notification: homepage comment notification is done
-  * exception handling: comment or thumb on deleted post is prevented, re-delete post and comment is settled
+  * message notification: homepage comment notification is done, other page comment notification: facebook style
+  * exception handling: comment or thumb on deleted post is prevented, re-delete post and comment are settled
   
 To be done
 
   * message notification 
   * exception handling
+  * notification persistence
   
 Bug to fix
   
