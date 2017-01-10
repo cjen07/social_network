@@ -22,92 +22,32 @@ let response = {
     }
   },
 
+  put_comment(m){
+    let list = $(".comment-notification-list")
+    for (let post_id in m){
+      let cs = m[post_id]
+      let count = cs.length
+      let text = (count == 1) ? "there is a new comment" : "there are " + count + " new comments"
+      let post = select_helper2(post_id, text, count)
+      list.append(post)
+      cs.forEach(e => {
+        // remove new comments that is loaded for integrity 
+        let email = e.email
+        let time = e.time
+        let comment = $("button[time='" + time + "'][email='" + email + "'][id='" + post_id + "']")
+        let div = comment.closest('.comment')
+        div.remove()
+      })
+    }
+  },
+
   new_comment(payload){
     let post_id = payload.post_id
     let list = $(".comment-notification-list")
     let post = list.find("#" + post_id)
     if (!post.length){
       let text = "there is a new comment"
-      post = $('<li/>')
-              .addClass("alert alert-info")
-              .attr("role", "alert")
-              .attr("count", 1)
-              .attr("id", post_id)
-              .text(text + " in a post")
-              .css('cursor', 'pointer')
-              .click( _ => {
-                $.get("/api/comment/get?post_id=" + post_id,
-                  data => {
-                    if (data.error){
-                      alert(data.error)
-                      return
-                    }
-                    let comments = data.comments
-                    $("#comment_" + post_id).empty()
-                    comments.forEach(function (e){
-                      let $img = $('<img/>', {
-                          alt: "User Image",
-                          "class": "img-circle avatar", 
-                          src: e.url
-                      })
-                      let $a = $('<a/>')
-                                .addClass("pull-left")
-                                .append($img)
-                      let $user = $('<h4/>')
-                                   .addClass("user")
-                                   .text(e.user.name)
-                      let $time = $('<h5/>')
-                                   .addClass("time")
-                                   .text(e.from_now)
-                      let $head = $('<div/>')
-                                   .addClass("comment-heading")
-                                   .append($user)
-                                   .append(" ")
-                                   .append($time)
-                      if (e.self){
-                        let $delete = $('<button/>', {
-                            "class": "btn btn-default btn-comment-delete btn-xs",
-                            time: e.time,
-                            id: post_id,
-                            text: "delete"
-                        })
-                        $head.append(" ")
-                        $head.append($delete)
-                      }
-                      else{
-                        let $reply = $('<button/>', {
-                            "class": "btn btn-default btn-comment-reply btn-xs",
-                            email: e.user.email,
-                            name: e.user.name,
-                            time: e.time,
-                            id: post_id,
-                            text: "reply"
-                        })
-                        $head.append(" ")
-                        $head.append($reply)
-                      }
-                      let $text
-                      if (jQuery.isEmptyObject(e.refer)){
-                        $text = $('<pre/>').text(e.text) 
-                      }
-                      else{
-                        $text = $('<pre/>').text("@" + e.refer.name + ": " + e.text) 
-                      }       
-                      let $body = $('<div/>')
-                                   .addClass("comment-body")
-                                   .append($head)
-                                   .append($text)
-                      $("#comment_" + post_id).append(
-                        $('<div/>')
-                          .addClass("comment")
-                          .append($a)
-                          .append($body)
-                      )
-                    })
-                  }, "json")
-                $(".panel[id='" + post_id + "']").scrollView()
-                post.remove()
-              })
+      post = select_helper2(post_id, text, 1)
       list.append(post)
     }
     else{
@@ -218,6 +158,91 @@ function select_helper1(name, type, count){
     .attr("count", count)
     .css('cursor', 'pointer')
     .click( _ => location.reload() )
+}
+
+function select_helper2(post_id, text, count){
+  let post = 
+  $('<li/>')
+    .addClass("alert alert-info")
+    .attr("role", "alert")
+    .attr("count", count)
+    .attr("id", post_id)
+    .text(text + " in a post")
+    .css('cursor', 'pointer')
+    .click( _ => {
+      $.get("/api/comment/get?post_id=" + post_id,
+        data => {
+          if (data.error){
+            alert(data.error)
+            return
+          }
+          let comments = data.comments
+          $("#comment_" + post_id).empty()
+          comments.forEach(function (e){
+            let $img = $('<img/>', {
+                alt: "User Image",
+                "class": "img-circle avatar", 
+                src: e.url
+            })
+            let $a = $('<a/>')
+                      .addClass("pull-left")
+                      .append($img)
+            let $user = $('<h4/>')
+                         .addClass("user")
+                         .text(e.user.name)
+            let $time = $('<h5/>')
+                         .addClass("time")
+                         .text(e.from_now)
+            let $head = $('<div/>')
+                         .addClass("comment-heading")
+                         .append($user)
+                         .append(" ")
+                         .append($time)
+            if (e.self){
+              let $delete = $('<button/>', {
+                  "class": "btn btn-default btn-comment-delete btn-xs",
+                  time: e.time,
+                  id: post_id,
+                  text: "delete"
+              })
+              $head.append(" ")
+              $head.append($delete)
+            }
+            else{
+              let $reply = $('<button/>', {
+                  "class": "btn btn-default btn-comment-reply btn-xs",
+                  email: e.user.email,
+                  name: e.user.name,
+                  time: e.time,
+                  id: post_id,
+                  text: "reply"
+              })
+              $head.append(" ")
+              $head.append($reply)
+            }
+            let $text
+            if (jQuery.isEmptyObject(e.refer)){
+              $text = $('<pre/>').text(e.text) 
+            }
+            else{
+              $text = $('<pre/>').text("@" + e.refer.name + ": " + e.text) 
+            }       
+            let $body = $('<div/>')
+                         .addClass("comment-body")
+                         .append($head)
+                         .append($text)
+            $("#comment_" + post_id).append(
+              $('<div/>')
+                .addClass("comment")
+                .append($a)
+                .append($body)
+            )
+          })
+        }, "json")
+      $(".panel[id='" + post_id + "']").scrollView()
+      post.remove()
+    })
+  return post
 }
 
 $.fn.scrollView = function () {

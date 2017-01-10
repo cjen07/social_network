@@ -15,6 +15,14 @@ let self = {
       myChannel.on("delete_comment", response.delete_comment)
       myChannel.on("new_post", response.warning)
       myChannel.on("delete_post", response.warning)
+
+      if (sessionStorage.getItem("home-flag") == "true") {
+        let n = sessionStorage.getItem("home-data")
+        let m = $.parseJSON(n)
+        response.put_comment(m)
+        sessionStorage.setItem("home-data", "")
+        sessionStorage.setItem("home-flag", "false")
+      }
     }
     else{
       myChannel.on("new_comment", response.new_comment_delay)
