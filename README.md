@@ -24,15 +24,20 @@ To start your Phoenix app:
 Feature
 
   * one comment can only be referred to one comment at one time using reply button
-  * message notification: post create or delete notification in friends (or strangers) homepage and news page
-  * message notification: homepage comment notification is done, other page comment notification: facebook style
-  * exception handling: comment or thumb on deleted post is prevented, re-delete post and comment are settled
+  * currently all notification are transient (not functioning when offine and will vanish after refresh)
+  * post create or delete notification in friends (or strangers) homepage and news page
+  * homepage comment notification is done, other page comment notification: facebook style
+  * comment or thumb on deleted post is prevented, re-delete post and comment are settled
   
 To be done
 
-  * message notification 
+  * other-page's post / thumb / reply notification 
   * exception handling
   * notification persistence
+  * private chat and verification
+  * follow / unfollow in friends homepage
+  * new follower notification
+  * friend relationship change notification
   
 Bug to fix
   
