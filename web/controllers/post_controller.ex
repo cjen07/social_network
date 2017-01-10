@@ -371,10 +371,10 @@ defmodule SocialNetwork.PostController do
         """ 
     end
 
-    result = Bolt.query!(Bolt.conn, cypher)
+    result0 = Bolt.query!(Bolt.conn, cypher)
 
-    Logger.info "here is result"
-    Logger.debug "#{inspect(result)}"
+    Logger.info "here is thumb change result0"
+    Logger.debug "#{inspect(result0)}"
 
     cypher = """
       MATCH (a:Post {id: #{id}})

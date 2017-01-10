@@ -6,19 +6,19 @@ $(function () {
   $('.btn-heart').click(function(){
     $(this).blur();
     var post_id = $(this).attr('id');
-    var span_id = $("#" + post_id + ' > .glyphicon').attr('id');
+    var span_id = $(this).find(".glyphicon").attr('id');
     $.get("/api/thumb?post_id=" + post_id + "&span_id=" + span_id,
       function (data){
         if (data.error){
           alert(data.error);
           return;
         }
-        $("#" + post_id).empty();
+        $('.btn-heart').empty();
         if (data.thumb) {
-          $("#" + post_id).append("<span id='0' class='glyphicon glyphicon-heart glyphicon-btn'></span>");
+          $('.btn-heart').append("<span id='0' class='glyphicon glyphicon-heart glyphicon-btn'></span>");
         }
         else {
-          $("#" + post_id).append("<span id='1' class='glyphicon glyphicon-heart-empty glyphicon-btn'></span>");
+          $('.btn-heart').append("<span id='1' class='glyphicon glyphicon-heart-empty glyphicon-btn'></span>");
         }
 
         $("#thumb_" + post_id).empty();
