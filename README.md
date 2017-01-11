@@ -39,7 +39,6 @@ To be done
   * new follower notification
   * friend relationship change notification
   * top page button
-  * search friends hints and no result notice
   * comment and reply user_link 
   
 Bug to fix
