@@ -82,10 +82,11 @@
               <% end %>
               <span class="glyphicon glyphicon-heart glyphicon-thumb"></span>
               <%= for thumb <- thumbs do %>
-                <%= if thumb["email"] == Coherence.current_user(@conn).email do %>
-                  <%= link thumb["name"], to: post_path(@conn, :index), class: "btn btn-default btn-xs" %>
+                <% email = thumb["email"] %>
+                <%= if email == Coherence.current_user(@conn).email do %>
+                  <%= link thumb["name"], to: post_path(@conn, :index), class: "btn btn-default btn-xs btn-thumb", email: email %>
                 <% else %>
-                  <%= link thumb["name"], to: post_path(@conn, :friend, %{:user => thumb}), class: "btn btn-default btn-xs" %>
+                  <%= link thumb["name"], to: post_path(@conn, :friend, %{:user => thumb}), class: "btn btn-default btn-xs btn-thumb", email: email %>
                 <% end %>
               <% end %>
             <% end %>

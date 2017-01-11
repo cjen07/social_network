@@ -13,7 +13,7 @@ $(function () {
           alert(data.error);
           return;
         }
-       $(".btn-heart[id='" + post_id + "']").empty();
+        $(".btn-heart[id='" + post_id + "']").empty();
         if (data.thumb) {
           $(".btn-heart[id='" + post_id + "']").append("<span id='0' class='glyphicon glyphicon-heart glyphicon-btn'></span>");
         }
@@ -30,12 +30,12 @@ $(function () {
           $("#thumb_" + post_id).append("<span class='glyphicon glyphicon-heart glyphicon-thumb'></span> ");
           thumbs.forEach(function (e){
             if (e.self){
-              $("#thumb_" + post_id).append("<a class='btn btn-default btn-xs' href='/home'>" + e.name + "</a> ");
+              $("#thumb_" + post_id).append("<a class='btn btn-default btn-xs btn-thumb' email='" + e.email + "' href='/home'>" + e.name + "</a> ");
             }
             else{
               var name = encodeURIComponent(e.name);
               var email = encodeURIComponent(e.email);
-              $("#thumb_" + post_id).append("<a class='btn btn-default btn-xs' href=/hub?user[email]=" + email + "&amp;user[name]=" + name + ">" + e.name + "</a> ");
+              $("#thumb_" + post_id).append("<a class='btn btn-default btn-xs btn-thumb' email='" + e.email + "' href=/hub?user[email]=" + email + "&amp;user[name]=" + name + ">" + e.name + "</a> ");
             }
           });
         }

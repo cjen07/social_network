@@ -21,6 +21,18 @@ defmodule SocialNetwork.PostView do
     %{error: reason}
   end
 
+  def render("home_message.json", %{comments: comments, thumbs: thumbs, has_image: has_image}) do
+    comments = 
+      comments
+      |> Enum.map(fn c -> Map.put(c, "from_now", parse_time(c["time"])) end)
+      |> Enum.map(fn c -> Map.put(c, "url", Exgravatar.gravatar_url(c["user"]["email"], secure: false, s: 50)) end)
+    %{comments: comments, thumbs: thumbs, has_image: has_image}
+  end
+
+  def render("home_message.json", %{error: reason}) do
+    %{error: reason}
+  end
+
   def parse_time(time) do
     time 
     |> DateTime.from_unix!()

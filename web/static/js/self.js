@@ -11,22 +11,26 @@ let self = {
       .receive("error", reason => console.log("join my channel failed", reason) )
     let me = $(".myChannel")
     if (me.length){
-      myChannel.on("new_comment", response.new_comment)
-      myChannel.on("delete_comment", response.delete_comment)
+      myChannel.on("new_comment", response.new_home_message)
+      myChannel.on("delete_comment", response.delete_home_message)
+      myChannel.on("new_thumb", response.new_home_message)
+      myChannel.on("delete_thumb", response.delete_home_message)
       myChannel.on("new_post", response.warning)
       myChannel.on("delete_post", response.warning)
 
       if (sessionStorage.getItem("home-flag") == "true") {
         let n = sessionStorage.getItem("home-data")
         let m = $.parseJSON(n)
-        response.put_comment(m)
+        response.put_home_message(m)
         sessionStorage.setItem("home-data", "")
         sessionStorage.setItem("home-flag", "false")
       }
     }
     else{
-      myChannel.on("new_comment", response.new_comment_delay)
-      myChannel.on("delete_comment", response.delete_comment_delay)
+      myChannel.on("new_comment", response.new_home_message_delay)
+      myChannel.on("delete_comment", response.delete_home_message_delay)
+      myChannel.on("new_thumb", response.new_home_message_delay)
+      myChannel.on("delete_thumb", response.delete_home_message_delay)
     }
 
     $.get("/api/friends",

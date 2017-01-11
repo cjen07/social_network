@@ -325,7 +325,7 @@ defmodule SocialNetwork.PostController do
     Logger.debug "#{inspect(result)}"
 
     if Map.get(result, :stats) == nil do
-
+      # unless in almost all cases now
       conn
       |> put_flash(:info, "Post is already deleted.")
       |> redirect(to: post_path(conn, :index))
@@ -344,6 +344,40 @@ defmodule SocialNetwork.PostController do
       |> redirect(to: post_path(conn, :index))
 
     end
+
+  end
+
+  defp get_thumbs(conn, id) do
+
+    cypher = """
+      MATCH (a:Post {id: #{id}})<-[b:THUMBED]-(c:User)
+      RETURN c
+      ORDER BY b.time
+    """
+    result = Bolt.query!(Bolt.conn, cypher) |> Enum.map(fn x -> (x["c"]).properties end)
+
+    Logger.info "here is thumbed result"
+    Logger.debug "#{inspect(result)}"
+
+    result1 = Enum.map(result, fn x ->
+      Map.put(x, "self", x["email"] == Coherence.current_user(conn).email)
+    end)
+
+    thumbs = result1
+
+    cypher = """
+      MATCH (a:Post {id: #{id}})
+      RETURN a.has_image AS b
+    """
+
+    result2 = Bolt.query!(Bolt.conn, cypher) |> Enum.at(0)
+
+    Logger.info "here is result2"
+    Logger.debug "#{inspect(result2)}"
+
+    has_image = result2["b"]
+
+    {thumbs, has_image}
 
   end
 
@@ -377,8 +411,8 @@ defmodule SocialNetwork.PostController do
     Logger.debug "#{inspect(result0)}"
 
     cypher = """
-      MATCH (a:Post {id: #{id}})
-      RETURN a
+      MATCH (a:Post {id: #{id}})-[:BELONGS_TO]->(b:User)
+      RETURN b
     """
 
     result = Bolt.query!(Bolt.conn, cypher)
@@ -389,33 +423,17 @@ defmodule SocialNetwork.PostController do
       
     else
 
-      cypher = """
-        MATCH (a:Post {id: #{id}})<-[b:THUMBED]-(c:User)
-        RETURN c
-        ORDER BY b.time
-      """
-      result = Bolt.query!(Bolt.conn, cypher) |> Enum.map(fn x -> (x["c"]).properties end)
+      result = result |> Enum.map(fn x -> (x["b"]).properties end) |> Enum.at(0)
 
-      Logger.info "here is thumbed result"
-      Logger.debug "#{inspect(result)}"
+      that_email = result["email"]
 
-      result1 = Enum.map(result, fn x ->
-        Map.put(x, "self", x["email"] == email)
-      end)
+      if is_list(result0) do
+        SocialNetwork.Endpoint.broadcast("user:" <> that_email, "new_thumb", %{post_id: id, email: email, type: "thumb"})
+      else
+        SocialNetwork.Endpoint.broadcast("user:" <> that_email, "delete_thumb", %{post_id: id, email: email, type: "thumb"})
+      end
 
-      thumbs = result1
-
-      cypher = """
-        MATCH (a:Post {id: #{id}})
-        RETURN a.has_image AS b
-      """
-
-      result2 = Bolt.query!(Bolt.conn, cypher) |> Enum.at(0)
-
-      Logger.info "here is result2"
-      Logger.debug "#{inspect(result2)}"
-
-      has_image = result2["b"]
+      {thumbs, has_image} = get_thumbs(conn, id)
 
       render(conn, "thumb.json", thumb: (span_id == "1"), thumbs: thumbs, has_image: has_image)
 
@@ -423,9 +441,18 @@ defmodule SocialNetwork.PostController do
 
   end
 
-  def get_comment(conn, %{"post_id" => post_id}) do
+  def get_home_message(conn, %{"post_id" => post_id}) do
 
     id = String.to_integer(post_id)
+
+    comments = get_comments(conn, id)
+    {thumbs, has_image} = get_thumbs(conn, id)
+
+    render(conn, "home_message.json", comments: comments, thumbs: thumbs, has_image: has_image)
+    
+  end
+
+  defp get_comments(conn, id) do
 
     cypher = """
       MATCH (a:Post {id: #{id}})<-[:POINTS_TO]-(b:Comment)-[:BELONGS_TO]->(c:User)
@@ -449,14 +476,11 @@ defmodule SocialNetwork.PostController do
         end
       end)
 
-    comments = 
-      Enum.zip(comments, users) 
-      |> Enum.map(fn {c, u} -> Map.put(c, "user", u) end)
-      |> Enum.zip(refers)
-      |> Enum.map(fn {c, r} -> Map.put(c, "refer", r) end)
-      |> Enum.map(fn c -> Map.put(c, "self", c["user"]["email"] == Coherence.current_user(conn).email) end)
-
-    render(conn, "comment.json", comments: comments)
+    Enum.zip(comments, users) 
+    |> Enum.map(fn {c, u} -> Map.put(c, "user", u) end)
+    |> Enum.zip(refers)
+    |> Enum.map(fn {c, r} -> Map.put(c, "refer", r) end)
+    |> Enum.map(fn c -> Map.put(c, "self", c["user"]["email"] == Coherence.current_user(conn).email) end)
     
   end
 
@@ -518,11 +542,13 @@ defmodule SocialNetwork.PostController do
 
         that_email = result0["email"]
 
-        if that_email != email, do: SocialNetwork.Endpoint.broadcast("user:" <> that_email, "new_comment", %{post_id: id, email: email, time: time})
+        if that_email != email, do: SocialNetwork.Endpoint.broadcast("user:" <> that_email, "new_comment", %{post_id: id, email: email, time: time, type: "comment"})
 
       end
 
-      get_comment(conn, %{"post_id" => post_id})
+      comments = get_comments(conn, id)
+
+      render(conn, "comment.json", comments: comments)
 
     end
   end
@@ -574,9 +600,11 @@ defmodule SocialNetwork.PostController do
 
       that_email = result0["email"]
 
-      if that_email != email, do: SocialNetwork.Endpoint.broadcast("user:" <> that_email, "delete_comment", %{post_id: id, email: email, time: time})
+      if that_email != email, do: SocialNetwork.Endpoint.broadcast("user:" <> that_email, "delete_comment", %{post_id: id, email: email, time: time, type: "comment"})
 
-      get_comment(conn, %{"post_id" => post_id})
+      comments = get_comments(conn, id)
+
+      render(conn, "comment.json", comments: comments)
 
     end
     
