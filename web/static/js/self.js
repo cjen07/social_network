@@ -31,6 +31,8 @@ let self = {
       myChannel.on("delete_comment", response.delete_home_message_delay)
       myChannel.on("new_thumb", response.new_home_message_delay)
       myChannel.on("delete_thumb", response.delete_home_message_delay)
+      myChannel.on("new_post", response.warning)
+      myChannel.on("delete_post", response.warning)
     }
 
     $.get("/api/friends",

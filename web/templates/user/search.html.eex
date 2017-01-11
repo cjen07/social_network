@@ -1,4 +1,5 @@
 <h2>Search friends</h2>
+<h5>with part of name or email it contains, or both</h5>
 
 <%= form_for @conn, user_path(@conn, :search_submit), [as: :search], fn f -> %>
 
