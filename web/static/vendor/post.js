@@ -13,12 +13,12 @@ $(function () {
           alert(data.error);
           return;
         }
-        $('.btn-heart').empty();
+       $(".btn-heart[id='" + post_id + "']").empty();
         if (data.thumb) {
-          $('.btn-heart').append("<span id='0' class='glyphicon glyphicon-heart glyphicon-btn'></span>");
+          $(".btn-heart[id='" + post_id + "']").append("<span id='0' class='glyphicon glyphicon-heart glyphicon-btn'></span>");
         }
         else {
-          $('.btn-heart').append("<span id='1' class='glyphicon glyphicon-heart-empty glyphicon-btn'></span>");
+          $(".btn-heart[id='" + post_id + "']").append("<span id='1' class='glyphicon glyphicon-heart-empty glyphicon-btn'></span>");
         }
 
         $("#thumb_" + post_id).empty();
