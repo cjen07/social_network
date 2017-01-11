@@ -1,5 +1,5 @@
 <%= if @users == [] do %>
-  <p class="alert alert-info" role="alert" >Unfortunately no results.</p>
+  <p class="alert alert-info" role="alert" >Unfortunately no result.</p>
 <% end %>
 
 <%= if @search do %>

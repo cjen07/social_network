@@ -529,20 +529,20 @@ defmodule SocialNetwork.PostController do
       
     else
 
-      if email0 == "" do
+      cypher = """
+        MATCH (a:Post {id: #{id}})-[:BELONGS_TO]->(b: User)
+        RETURN b
+      """
+      result0 = Bolt.query!(Bolt.conn, cypher) |> Enum.map(fn x -> (x["b"]).properties end) |> Enum.at(0)
 
-        cypher = """
-          MATCH (a:Post {id: #{id}})-[:BELONGS_TO]->(b: User)
-          RETURN b
-        """
-        result0 = Bolt.query!(Bolt.conn, cypher) |> Enum.map(fn x -> (x["b"]).properties end) |> Enum.at(0)
+      Logger.info "here is post owner result0"
+      Logger.debug "#{inspect(result0)}"
 
-        Logger.info "here is post owner result0"
-        Logger.debug "#{inspect(result0)}"
+      that_email = result0["email"]
 
-        that_email = result0["email"]
+      if (email0 == "" and that_email != email) or email0 == that_email do
 
-        if that_email != email, do: SocialNetwork.Endpoint.broadcast("user:" <> that_email, "new_comment", %{post_id: id, email: email, time: time, type: "comment"})
+        SocialNetwork.Endpoint.broadcast("user:" <> that_email, "new_comment", %{post_id: id, email: email, time: time, type: "comment"})
 
       end
 
