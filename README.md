@@ -26,18 +26,21 @@ Feature
   * one comment can only be referred to one comment at one time using reply button
   * currently all notification are transient (not functioning when offine and will vanish after refresh)
   * post create or delete notification in friends (or strangers) homepage and news page
-  * homepage comment notification is done, other page comment notification: facebook style
+  * homepage and other-page comment and thumb notification: facebook style
   * comment or thumb on deleted post is prevented, re-delete post and comment are settled
   
 To be done
 
-  * other-page's post / thumb / reply notification 
+  * other-page's post / reply notification 
   * exception handling
   * notification persistence
   * private chat and verification
   * follow / unfollow in friends homepage
   * new follower notification
   * friend relationship change notification
+  * top page button
+  * search friends hints and no result notice
+  * comment and reply user_link 
   
 Bug to fix
   
