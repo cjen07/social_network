@@ -23,27 +23,25 @@ To start your Phoenix app:
 
 Feature
 
+  * online notification persistence
   * one comment can only be referred to one comment at one time using reply button
-  * currently all notification are transient (not functioning when offine and will vanish after refresh)
-  * post create or delete notification in friends (or strangers) homepage and news page
-  * homepage and other-page comment and thumb notification: facebook style
-  * comment or thumb on deleted post is prevented, re-delete post and comment are settled
+  * new/delete post/comment/reply/thumb notifications of homepage and news page
+  * comment or thumb on deleted post, re-delete post/comment and re-thumb notification are settled
+  * if you want to be notified when you are replied, follow the post owner
   
 To be done
-
-  * other-page's post / reply notification 
-  * exception handling
-  * notification persistence
-  * private chat and verification
-  * follow / unfollow in friends homepage
-  * new follower notification
-  * friend relationship change notification
+  
+  * exception handling: delete user
   * top page button
+  * basic friends page notification: new follower, post/comment/reply integrity with news notification 
+  * offline notification persistence
+  * private chat and verification
+  * friend relationship change notification
+  * follow / unfollow in friends homepage
   * comment and reply user_link 
   
 Bug to fix
   
   * large image upload failure and image upload preview cannot be refixed
-  * user deleted misbehaviour
   * unclear bolt_sip bug
 
