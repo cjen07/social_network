@@ -194,6 +194,39 @@ $(function () {
         });
       }, "json");
   });
+
+  $("a.btn-post-delete").click(function(e){
+    if (confirm('Are you sure?')){
+      var $panel = $(this).closest(".panel-google-plus");
+      var post_id = $panel.attr('id');
+      if (sessionStorage.getItem("home-flag") == "true") {
+        var n = sessionStorage.getItem("home-data");
+        var m = $.parseJSON(n);
+        var id = post_id;
+        console.log(m);
+        if (id in m){
+          m[id] = [];
+          var flag = true;
+          for (var key in m){
+            if((m[key]).length > 0){
+              flag = false;
+              break;
+            }
+          }
+          console.log(flag);
+          if (flag){
+            sessionStorage.setItem("home-flag", "false");
+          }
+          else{
+            sessionStorage.setItem("home-data", JSON.stringify(m));
+          }
+        }
+      }
+      return true;
+    }
+    return false;
+  });
+
   $(".panel-footer").on("click", '.btn-comment-reply', function(){
     var email = $(this).attr('email');
     var name = $(this).attr('name');

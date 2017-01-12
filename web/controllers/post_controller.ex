@@ -292,7 +292,7 @@ defmodule SocialNetwork.PostController do
     Logger.info "here is created result"
     Logger.debug "#{inspect(result)}"
 
-    SocialNetwork.Endpoint.broadcast("user:" <> email, "new_post", %{email: email, token_time: String.to_integer(token_time)})
+    SocialNetwork.Endpoint.broadcast("user:" <> email, "new_post", %{post_id: id, email: email, token_time: String.to_integer(token_time)})
 
     conn
     |> put_flash(:info, "Post created successfully.")
@@ -428,9 +428,14 @@ defmodule SocialNetwork.PostController do
       that_email = result["email"]
 
       if is_list(result0) do
-        SocialNetwork.Endpoint.broadcast("user:" <> that_email, "new_thumb", %{post_id: id, email: email, type: "thumb"})
+        that_time = result0 |> Enum.map(fn x -> (x["b"]).properties end) |> Enum.at(0) |> Map.get("time")
+        if that_time == time do
+          SocialNetwork.Endpoint.broadcast("user:" <> that_email, "new_thumb", %{post_id: id, email: email, type: "thumb"})
+        end
       else
-        SocialNetwork.Endpoint.broadcast("user:" <> that_email, "delete_thumb", %{post_id: id, email: email, type: "thumb"})
+        if Map.get(result0, :stats) != nil do
+          SocialNetwork.Endpoint.broadcast("user:" <> that_email, "delete_thumb", %{post_id: id, email: email, type: "thumb"})
+        end
       end
 
       {thumbs, has_image} = get_thumbs(conn, id)
@@ -540,13 +545,29 @@ defmodule SocialNetwork.PostController do
 
       that_email = result0["email"]
 
-      if (email0 == "" and that_email != email) or email0 == that_email do
+      if that_email != email do 
 
+        # this means the post owner will monitor all comments
         SocialNetwork.Endpoint.broadcast("user:" <> that_email, "new_comment", %{post_id: id, email: email, time: time, type: "comment"})
 
       end
 
+      if email0 != "" and email0 != that_email do
+
+        SocialNetwork.Endpoint.broadcast("user:" <> email0, "new_reply", %{post_id: id, email: email, time: time, source: email0})
+        
+      end
+
       comments = get_comments(conn, id)
+
+      if that_email == email and email0 == "" do
+        Enum.map(comments, fn x -> 
+          this_email = x["user"]["email"]
+          if this_email != email do
+            SocialNetwork.Endpoint.broadcast("user:" <> this_email, "new_reply", %{post_id: id, email: email, time: time, source: this_email})
+          end
+        end)
+      end
 
       render(conn, "comment.json", comments: comments)
 
@@ -569,12 +590,25 @@ defmodule SocialNetwork.PostController do
 
     cypher = """
       MATCH (a:Post {id: #{id}})<-[:POINTS_TO]-(b:Comment {time: #{time}})-[:BELONGS_TO]->(c:User {email: '#{email}'})
+      OPTIONAL MATCH (b)-[:REFERS_TO]->(d:User)
       DETACH DELETE b
+      RETURN d.email AS refer
     """
     result = Bolt.query!(Bolt.conn, cypher)
 
     Logger.info "here is deleted comment result"
     Logger.debug "#{inspect(result)}"
+
+    email0 = result |> Enum.map(fn x -> 
+        refer = x["refer"]
+        case refer do
+          nil -> ""
+          _ -> refer          
+        end
+      end) |> Enum.at(0)
+
+    Logger.info "here is deleted comment email0"
+    Logger.debug "#{inspect(email0)}"
 
     cypher = """
       MATCH (a:Post {id: #{id}})
@@ -600,9 +634,29 @@ defmodule SocialNetwork.PostController do
 
       that_email = result0["email"]
 
-      if that_email != email, do: SocialNetwork.Endpoint.broadcast("user:" <> that_email, "delete_comment", %{post_id: id, email: email, time: time, type: "comment"})
+      if that_email != email do
+
+        # this means the post owner will monitor all comments
+        SocialNetwork.Endpoint.broadcast("user:" <> that_email, "delete_comment", %{post_id: id, email: email, time: time, type: "comment"})
+
+      end
+
+      if email0 != "" and email0 != that_email do
+
+        SocialNetwork.Endpoint.broadcast("user:" <> email0, "delete_reply", %{post_id: id, email: email, time: time, source: email0})
+        
+      end 
 
       comments = get_comments(conn, id)
+
+      if that_email == email and email0 == "" do
+        Enum.map(comments, fn x -> 
+          this_email = x["user"]["email"]
+          if this_email != email do
+            SocialNetwork.Endpoint.broadcast("user:" <> this_email, "delete_reply", %{post_id: id, email: email, time: time, source: this_email})
+          end
+        end)
+      end
 
       render(conn, "comment.json", comments: comments)
 

@@ -38,8 +38,8 @@
         </ol>
       </header>
 
-      <p class="alert alert-info" role="alert" count="0"><%= get_flash(@conn, :info) %></p>
-      <p class="alert alert-danger" role="alert" count="0"><%= get_flash(@conn, :error) %></p>
+      <p class="alert alert-info message-info" role="alert" count="0"><%= get_flash(@conn, :info) %></p>
+      <p class="alert alert-danger message-danger" role="alert" count="0"><%= get_flash(@conn, :error) %></p>
       <p class="alert alert-warning" role="alert"></p>
       <ul class="message-notification-list"></ul>
 
