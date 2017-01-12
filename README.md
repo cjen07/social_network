@@ -24,24 +24,30 @@ To start your Phoenix app:
 Feature
 
   * online notification persistence
-  * one comment can only be referred to one comment at one time using reply button
   * new/delete post/comment/reply/thumb notifications of homepage and news page
   * comment or thumb on deleted post, re-delete post/comment and re-thumb notification are settled
-  * if you want to be notified when you are replied, follow the post owner
   
 To be done
   
-  * exception handling: delete user
-  * top page button
-  * basic friends page notification: new follower, post/comment/reply integrity with news notification 
+  * delete_user notification handling, home-data, post-data, news-data
+  * no post notice: unfortunatly no result
+  * follow / unfollow in friends homepage
+  * comment and reply user_link
+  * image size, text length restriction
+  * image preview refix to the location
+  * friends homepage notification integration with news page
+  * friend relationship change notification: new follower and following deleted
   * offline notification persistence
   * private chat and verification
-  * friend relationship change notification
-  * follow / unfollow in friends homepage
-  * comment and reply user_link 
-  
-Bug to fix
-  
-  * large image upload failure and image upload preview cannot be refixed
-  * unclear bolt_sip bug
 
+Limitation
+
+  * one comment can only be referred to one comment at one time using reply button
+  * if you want to be notified when you are replied, you have to follow the post owner
+  * same user same time double comment on same post will resulted in undefined behaviour
+  * only one image per post is allowed, audio/video not supported, post re-delivering not supported
+  
+External bug to figure out
+  
+  * bolt_sip bug, not knowing how to trigger it again
+  * phoenix_timex Timex.from_now() -1 minutes ago 
