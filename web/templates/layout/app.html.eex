@@ -16,6 +16,9 @@
     <script type="text/javascript">
       document.getElementById("hideAll").style.display = "block";
     </script>  %>
+    <a class="back-to-top" style="display: inline;" href="#">
+      <span class="glyphicon glyphicon-triangle-top"></span>
+    </a>
     <div class="container">
       <header class="header" style="padding-top: 15px">
         <%= if Coherence.current_user(@conn) do %>

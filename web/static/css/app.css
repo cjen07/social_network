@@ -255,3 +255,18 @@ a.navbar-form {
   top: -2px;
   right: 1px;
 }
+
+.back-to-top {
+ 
+  position: fixed;
+  bottom: 10px;
+  right: -10px;
+  width: 70px;
+  height: 70px;
+  z-index: 100;
+ 
+}
+
+.glyphicon.glyphicon-triangle-top {
+    font-size: 40px;
+}

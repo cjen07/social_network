@@ -127,13 +127,24 @@ defmodule SocialNetwork.Coherence.RegistrationController do
     username = user.name
     email = user.email
     Logger.debug "#{inspect(username)} and #{inspect(email)}"
+
+    cypher = """
+      MATCH (n:User {email: '#{email}'})<-[:BELONGS_TO]-(m)
+      DETACH DELETE m
+    """
+    result = Bolt.query!(Bolt.conn, cypher)
+    Logger.info "Here is deleted comments and posts."
+    Logger.debug "#{inspect(result)}"
+
     cypher = """
       MATCH (n:User {email: '#{email}'})
       DETACH DELETE n
     """
     result = Bolt.query!(Bolt.conn, cypher)
-    Logger.info "Here is the result."
+    Logger.info "Here is deleted user."
     Logger.debug "#{inspect(result)}"
+
+    SocialNetwork.Endpoint.broadcast("user:" <> email, "delete_user", %{email: email})
 
     redirect_to(conn, :registration_delete, params)
   end

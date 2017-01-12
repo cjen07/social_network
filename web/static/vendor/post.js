@@ -1,8 +1,31 @@
 $(function () {
+
   if ( sessionStorage.getItem("warning") == "true" ) {
     $(".alert-warning").text("updated by another endpoint");
     sessionStorage.setItem("warning", "false");
   }
+
+  var offset = 10;
+  var duration = 300;
+  
+  if ($(this).scrollTop() < offset) {
+    $('.back-to-top').hide();
+  }
+
+  $(window).scroll(function() {
+    if ($(this).scrollTop() > offset) {
+      $('.back-to-top').fadeIn(duration);
+    } else {
+      $('.back-to-top').fadeOut(duration);
+    }
+  });
+
+  $('.back-to-top').click(function(event) {
+    event.preventDefault();  
+    $('html, body').animate({scrollTop: 0}, "slow");
+    return false;
+  });
+
   $('.btn-heart').click(function(){
     $(this).blur();
     var post_id = $(this).attr('id');
