@@ -1,5 +1,10 @@
 # SocialNetwork
 
+Remark
+  
+  * Very welcome to anyone who is willing to try it out and give any suggestions
+  * All releases are working well and this respository is still under rapid development
+
 To setup
 
   * Install phoenix framework and its [components](http://www.phoenixframework.org/docs/installation) including erlang, elixir, phoenix, nodejs and postgresql
@@ -35,6 +40,8 @@ To be done
   * comment and reply user_link
   * image size, text length restriction
   * image preview refix to the location
+  * integration test using hound or wallaby
+  * upgrade everything for elixir 1.4.0
   * friends homepage notification integration with news page
   * friend relationship change notification: new follower and following deleted
   * offline notification persistence
@@ -47,7 +54,7 @@ Limitation
   * same user same time double comment on same post will resulted in undefined behaviour
   * only one image per post is allowed, audio/video not supported, post re-delivering not supported
   
-External bug to figure out
+Bugs
   
-  * bolt_sip bug, not knowing how to trigger it again
+  * bolt_sip bug, not knowing exactly how to trigger it again
   * phoenix_timex Timex.from_now() -1 minutes ago 
