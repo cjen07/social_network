@@ -129,11 +129,44 @@ defmodule SocialNetwork.Coherence.RegistrationController do
     Logger.debug "#{inspect(username)} and #{inspect(email)}"
 
     cypher = """
-      MATCH (n:User {email: '#{email}'})<-[:BELONGS_TO]-(m)
+      MATCH (n:User {email: '#{email}'})<-[:BELONGS_TO]-(m:Comment)
       DETACH DELETE m
     """
     result = Bolt.query!(Bolt.conn, cypher)
-    Logger.info "Here is deleted comments and posts."
+    Logger.info "Here is deleted comments."
+    Logger.debug "#{inspect(result)}"
+
+    cypher = """
+      MATCH (n:User {email: '#{email}'})<-[:BELONGS_TO]-(m:Post)
+      RETURN m
+    """
+    result = Bolt.query!(Bolt.conn, cypher) |> Enum.map(fn x -> (x["m"]).properties end)
+
+    Logger.info "Here is all posts."
+    Logger.debug "#{inspect(result)}"
+
+    Enum.map(result, fn x  ->
+      id = x["id"]
+      if x["has_image"] do
+        File.rm_rf("./priv/static/uploads/posts/" <> "#{id}")
+      end
+
+      cypher = """
+        MATCH (n:Post {id: #{id}})<-[:POINTS_TO]-(m:Comment)
+        DETACH DELETE m
+      """
+
+      result1 = Bolt.query!(Bolt.conn, cypher)
+      Logger.info "Here is deleted related comments."
+      Logger.debug "#{inspect(result1)}"
+    end)
+
+    cypher = """
+      MATCH (n:User {email: '#{email}'})<-[:BELONGS_TO]-(m:Post)
+      DETACH DELETE m
+    """
+    result = Bolt.query!(Bolt.conn, cypher)
+    Logger.info "Here is deleted posts."
     Logger.debug "#{inspect(result)}"
 
     cypher = """
