@@ -34,7 +34,6 @@ Feature
   
 To be done
   
-  * delete_user notification handling, home-data, post-data, news-data
   * no post notice: unfortunatly no result
   * follow / unfollow in friends homepage
   * comment and reply user_link
