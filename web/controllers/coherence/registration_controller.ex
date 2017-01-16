@@ -119,6 +119,7 @@ defmodule SocialNetwork.Coherence.RegistrationController do
   Delete a registration.
   """
   def delete(conn, params) do
+    %{"token_time" => token_time} = params
     user = Coherence.current_user(conn)
     conn = Coherence.SessionController.delete(conn)
     Config.repo.delete! user
@@ -129,12 +130,16 @@ defmodule SocialNetwork.Coherence.RegistrationController do
     Logger.debug "#{inspect(username)} and #{inspect(email)}"
 
     cypher = """
-      MATCH (n:User {email: '#{email}'})<-[:BELONGS_TO]-(m:Comment)
-      DETACH DELETE m
+      MATCH (a:User)<-[:BELONGS_TO]-(b:Post)<-[:THUMBED]-(c:User {email: '#{email}'})
+      RETURN a.email AS email, b.id AS id
     """
     result = Bolt.query!(Bolt.conn, cypher)
-    Logger.info "Here is deleted comments."
-    Logger.debug "#{inspect(result)}"
+
+    Enum.map(result, fn x ->
+      id = x["id"]
+      that_email = x["email"]
+      SocialNetwork.Endpoint.broadcast("user:" <> that_email, "delete_thumb", %{post_id: id, email: email, type: "thumb"})
+    end)
 
     cypher = """
       MATCH (n:User {email: '#{email}'})<-[:BELONGS_TO]-(m:Post)
@@ -159,6 +164,8 @@ defmodule SocialNetwork.Coherence.RegistrationController do
       result1 = Bolt.query!(Bolt.conn, cypher)
       Logger.info "Here is deleted related comments."
       Logger.debug "#{inspect(result1)}"
+
+      SocialNetwork.Endpoint.broadcast("user:" <> email, "delete_post", %{post_id: id, email: email, token_time: String.to_integer(token_time)})
     end)
 
     cypher = """
@@ -167,6 +174,34 @@ defmodule SocialNetwork.Coherence.RegistrationController do
     """
     result = Bolt.query!(Bolt.conn, cypher)
     Logger.info "Here is deleted posts."
+    Logger.debug "#{inspect(result)}"
+
+    cypher = """
+      MATCH (a:User {email: '#{email}'})<-[:BELONGS_TO]-(b:Comment)-[:POINTS_TO]->(c:Post)-[:BELONGS_TO]->(e:User)
+      OPTIONAL MATCH (b)-[:REFERS_TO]->(d:User)
+      RETURN b.time AS time, c.id AS id, d.email AS email0, e.email AS that_email
+    """
+    result = Bolt.query!(Bolt.conn, cypher)
+
+    Enum.map(result, fn x ->
+      id = x["id"]
+      time = x["time"]
+      email0 = x["email0"]
+      that_email = x["that_email"]
+
+      if email0 == nil do
+        SocialNetwork.Endpoint.broadcast("user:" <> that_email, "delete_comment", %{post_id: id, email: email, time: time, type: "comment"})
+      else
+        SocialNetwork.Endpoint.broadcast("user:" <> email0, "delete_reply", %{post_id: id, email: email, time: time, source: email0})
+      end
+    end)
+
+    cypher = """
+      MATCH (n:User {email: '#{email}'})<-[:BELONGS_TO]-(m:Comment)
+      DETACH DELETE m
+    """
+    result = Bolt.query!(Bolt.conn, cypher)
+    Logger.info "Here is deleted comments."
     Logger.debug "#{inspect(result)}"
 
     cypher = """

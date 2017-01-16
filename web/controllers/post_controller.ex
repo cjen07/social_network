@@ -530,8 +530,19 @@ defmodule SocialNetwork.PostController do
 
     if result == [] do
 
-      render(conn, "comment.json", error: "the post is deleted")
-      
+      cypher = """
+        MATCH (a:Post {id: #{id}})
+        RETURN a
+      """
+
+      result = Bolt.query!(Bolt.conn, cypher)
+
+      if result == [] do
+        render(conn, "comment.json", error: "the post is deleted")
+      else
+        render(conn, "comment.json", error: "that user is deleted")
+      end
+
     else
 
       cypher = """

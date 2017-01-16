@@ -19,5 +19,5 @@
 </ul>
 
 <%= link "Edit", to: registration_path(@conn, :edit) %> |
-<%= link "Delete", to: registration_path(@conn, :delete), method: :delete, data: [confirm: "Are you sure?"] %> |
+<%= link "Delete", to: registration_path(@conn, :delete, %{:token_time => @conn.assigns[:token_time]}), method: :delete, data: [confirm: "Are you sure?"] %> |
 <%= link "Cancel", to: post_path(@conn, :index) %>
