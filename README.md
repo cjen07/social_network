@@ -31,16 +31,15 @@ Feature
   * online notification persistence
   * new/delete post/comment/reply/thumb notifications of homepage and news page
   * comment or thumb on deleted post, re-delete post/comment and re-thumb notification are settled
+  * image upload should be less than 2MB, post and comment should be no more than 500 characters
   
 To be done
   
-  * no post notice: unfortunatly no result
-  * follow / unfollow in friends homepage
   * comment and reply user_link
-  * image size, text length restriction
-  * image preview refix to the location
-  * integration test using hound or wallaby
   * upgrade everything for elixir 1.4.0
+  * make it dry in controllers
+  * integration test using hound or wallaby
+  * gif instuctions in this readme and online example
   * friends homepage notification integration with news page
   * friend relationship change notification: new follower and following deleted
   * offline notification persistence
