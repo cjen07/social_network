@@ -52,6 +52,8 @@ defmodule SocialNetwork.Router do
     get "/users/fof", UserController, :friends_of_friends
     post "/users", UserController, :follow
     delete "/users", UserController, :unfollow 
+    post "/users/onsite", UserController, :follow_onsite
+    delete "/users/onsite", UserController, :unfollow_onsite
 
     get "/home", PostController, :index
     get "/hub", PostController, :friend

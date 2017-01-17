@@ -1,7 +1,3 @@
-<%= if @users == [] do %>
-  <p class="alert alert-info" role="alert" >Unfortunately no result.</p>
-<% end %>
-
 <%= if @search do %>
   <h2>Search results</h2>
 <% else %>
@@ -32,6 +28,16 @@
     <h2>Your Followings</h2>
     |
     <%= link "Followers", to: user_path(@conn, :friends_of_friends, %{:user => Map.put(h, "type", "1"), :now => @now}) %>
+  <% end %>
+<% end %>
+
+<%= if @users == [] do %>
+  <br>
+  <%= if !@search do %>
+    <br>
+    <p class="alert alert-info" role="alert" >Unfortunately, no user result.</p>
+  <% else %>
+    <p class="alert alert-info" role="alert" >Unfortunately, no search result.</p>
   <% end %>
 <% end %>
 
@@ -87,12 +93,6 @@
 <% end %>
   </tbody>
 </table>
-
-<% else %>
-
-  <%= if !@search do %>
-    <br>
-  <% end %>
 
 <% end %>
 

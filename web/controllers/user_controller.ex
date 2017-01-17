@@ -171,6 +171,34 @@ defmodule SocialNetwork.UserController do
 
   end
 
+  def follow_onsite(conn, %{"user" => user}) do
+
+    user0 = Coherence.current_user(conn)
+
+    Logger.info  "Here is the user0."
+    username0 = user0.name
+    email0 = user0.email
+    Logger.debug "#{inspect(username0)} and #{inspect(email0)}"
+    
+    Logger.info  "Here is the user1."
+    username1 = user["name"]
+    email1 = user["email"]
+    Logger.debug "#{inspect(username1)} and #{inspect(email1)}"
+
+    cypher = """
+      MATCH (a:User {email: '#{email0}'}),(b:User {email: '#{email1}'})
+      CREATE (a)-[:FOLLOWS]->(b)
+    """
+    result = Bolt.query!(Bolt.conn, cypher)
+    Logger.info "Here is the result."
+    Logger.debug "#{inspect(result)}"
+
+    conn
+    |> put_flash(:info, "Friend followed successfully.")
+    |> redirect(to: post_path(conn, :friend, %{:user => user}))
+    
+  end
+
   def follow(conn, %{"user" => user, "now" => now}) do
 
     user0 = Coherence.current_user(conn)
@@ -206,6 +234,34 @@ defmodule SocialNetwork.UserController do
       |> redirect(to: user_path(conn, :friends_of_friends, %{:user => h, :now => t}))
     end
 
+  end
+
+  def unfollow_onsite(conn, %{"user" => user}) do
+
+    user0 = Coherence.current_user(conn)
+
+    Logger.info  "Here is the user0."
+    username0 = user0.name
+    email0 = user0.email
+    Logger.debug "#{inspect(username0)} and #{inspect(email0)}"
+    
+    Logger.info  "Here is the user1."
+    username1 = user["name"]
+    email1 = user["email"]
+    Logger.debug "#{inspect(username1)} and #{inspect(email1)}"
+
+    cypher = """
+      MATCH (a:User {email: '#{email0}'})-[r:FOLLOWS]->(b:User {email: '#{email1}'})
+      DELETE r
+    """
+    result = Bolt.query!(Bolt.conn, cypher)
+    Logger.info "Here is the result."
+    Logger.debug "#{inspect(result)}"
+
+    conn
+    |> put_flash(:info, "Friend unfollowed successfully.")
+    |> redirect(to: post_path(conn, :friend, %{:user => user}))
+    
   end
 
   def unfollow(conn, %{"user" => user, "now" => now}) do

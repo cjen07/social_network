@@ -4,13 +4,13 @@
 
     <div class="form-group">
       <%= label f, :text, class: "control-label" %>
-      <%= text_input f, :text, class: "form-control" %>
+      <%= text_input f, :text, class: "form-control", maxlength: "500" %>
     </div>
 
     <div class="form-group">
       <%= label f, :photo, class: "control-label" %>
       <div class="input-group image-preview">
-          <input type="text" class="form-control image-preview-filename" disabled="disabled"> 
+          <input type="text" class="form-control image-preview-filename" readonly> 
           <span class="input-group-btn">
               <!-- image-preview-clear button -->
               <button type="button" class="btn btn-default image-preview-clear" style="display:none;">
@@ -34,12 +34,25 @@
 <% else %>
   <%= if @type == "1" do %>
     <% email = @user["email"] %>
+    <p>
     <h2 class="userChannel" email="<%= email %>"><%= @user["name"] <> "'s" %> Posts</h2>
+    <%= if @flag do %>
+      <%= link "Unfollow", to: user_path(@conn, :unfollow_onsite, %{:user => @user}), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-warning btn-xs" %>
+    <% else %>
+      <%= link "follow", to: user_path(@conn, :follow_onsite, %{:user =>  @user}), method: :post, data: [confirm: "Are you sure?"], class: "btn btn-warning btn-xs" %>
+    <% end %>
+    </p>
   <% else %>
     <h2 class="usersChannel" >Your Friends' Posts</h2>
   <% end %>
 <% end %>
 
+<%= if @posts == [] and @type != "0" do %>
+  <%= if @type == "2" do %>
+    <br>
+  <% end %>
+  <p class="alert alert-info" role="alert" >Unfortunately, no post available</p>
+<% end %>
 
 <%= for post <- @posts do %>
   <% post_id = post["id"] %>
@@ -132,7 +145,7 @@
       <div class="panel-google-plus-comment">
           <%= img_tag(Exgravatar.gravatar_url(Coherence.current_user(@conn).email, secure: false, s: 50), class: "img-circle", alt: "User Image")%>
           <div class="panel-google-plus-textarea">
-              <textarea rows="4"></textarea>
+              <textarea rows="4" maxlength="500"></textarea>
               <button type="submit" class="btn btn-success btn-comment-create disabled" id="<%= post_id %>">Post comment</button>
               <button type="reset" class="btn btn-default">Cancel</button>
           </div>

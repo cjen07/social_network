@@ -74,10 +74,10 @@ defmodule SocialNetwork.PostController do
   end
 
   def friend(conn, %{"user" => user}) do
-    email = user["email"]
+    email0 = user["email"]
     
     cypher = """
-      MATCH (a:Post)-[:BELONGS_TO]->(b:User {email: '#{email}'})
+      MATCH (a:Post)-[:BELONGS_TO]->(b:User {email: '#{email0}'})
       RETURN a
       ORDER BY a.time DESC
     """
@@ -155,7 +155,15 @@ defmodule SocialNetwork.PostController do
     Logger.debug "#{inspect(result3)}"
 
     posts = result3
-    render(conn, "index.html", posts: posts, user: user, type: "1")
+
+    cypher = """
+      MATCH (a:User {email: '#{email}'})-[r:FOLLOWS]->(b:User {email: '#{email0}'})
+      RETURN r
+    """
+
+    result = Bolt.query!(Bolt.conn, cypher)
+
+    render(conn, "index.html", posts: posts, user: user, flag: result != [], type: "1")
   end
 
   def news(conn, _params) do

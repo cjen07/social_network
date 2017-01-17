@@ -1,12 +1,19 @@
 $(document).on('click', '#close-preview', function(){ 
     $('.image-preview').popover('hide');
-    // Hover befor close the preview
+    $(".image-preview").attr("fix", false)
+    // Hover before close the preview
     $('.image-preview').hover(
         function () {
-           $('.image-preview').popover('show');
+            var fix = $(".image-preview").attr("fix");
+            if (fix != "true"){
+                $('.image-preview').popover('show');
+            }
         }, 
-         function () {
-           $('.image-preview').popover('hide');
+        function () {
+            var fix = $(".image-preview").attr("fix");
+            if (fix != "true"){
+                $('.image-preview').popover('hide');
+            }
         }
     );    
 });
@@ -20,7 +27,10 @@ $(function() {
         style: 'font-size: initial;',
     });
     closebtn.attr("class","close pull-right");
-    // Set the popover default content
+    // fix after click the preview
+    $('.image-preview-filename').click(function(){
+        $(".image-preview").attr("fix", true);
+    });
     $('.image-preview').popover({
         trigger:'manual',
         html:true,
@@ -44,6 +54,12 @@ $(function() {
             height:200
         });      
         var file = this.files[0];
+        var size = file.size / 1000 / 1000;
+        if (size > 2){
+            alert("image size should be no more than 2MB");
+            $('.image-preview-clear').click();
+            return;
+        }
         var reader = new FileReader();
         // Set preview image into the popover data-content
         reader.onload = function (e) {
