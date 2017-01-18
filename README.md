@@ -35,9 +35,8 @@ Feature
   
 To be done
   
-  * comment and reply user_link
   * upgrade everything for elixir 1.4.0
-  * make it dry in controllers
+  * make it dry in controllers and js, move js in vendor to ES6 
   * integration test using hound or wallaby
   * gif instuctions in this readme and online example
   * friends homepage notification integration with news page
