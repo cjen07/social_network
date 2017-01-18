@@ -38,6 +38,7 @@ To be done
   * make it dry in controllers and js, move js in vendor to ES6, and test it by wallaby
   * friends homepage notification integration with news page
   * friend relationship change notification: new follower and following deleted
+  * rewrite back button in friends page to be more concise
   * gif instuctions in this readme and online example
   * offline notification persistence
   * private chat and verification
