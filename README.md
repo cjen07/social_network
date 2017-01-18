@@ -35,7 +35,6 @@ Feature
   
 To be done
   
-  * upgrade everything for elixir 1.4.0
   * make it dry in controllers and js, move js in vendor to ES6 
   * integration test using hound or wallaby
   * gif instuctions in this readme and online example
