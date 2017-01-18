@@ -94,7 +94,7 @@ let self = {
           myChannel.on("delete_reply", response.delete_reply)
         }
       }, "json")
-  
+    
   }
 }
 export default self
