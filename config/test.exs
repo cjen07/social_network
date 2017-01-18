@@ -4,7 +4,7 @@ use Mix.Config
 # you can enable the server option below.
 config :social_network, SocialNetwork.Endpoint,
   http: [port: 4001],
-  server: false
+  server: true
 
 # Print only warnings and errors during test
 config :logger, level: :warn
@@ -17,3 +17,7 @@ config :social_network, SocialNetwork.Repo,
   database: "social_network_test",
   hostname: "localhost",
   pool: Ecto.Adapters.SQL.Sandbox
+
+config :wallaby, screenshot_on_failure: true
+
+config :social_network, :sql_sandbox, true

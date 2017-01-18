@@ -39,7 +39,9 @@ defmodule SocialNetwork.Mixfile do
      {:cowboy, "~> 1.0"},
      {:coherence, "~> 0.3"},
      {:bolt_sips, "~> 0.1"},
-     {:arc, "~> 0.6.0"}]
+     {:arc, "~> 0.6.0"},
+     {:wallaby, "~> 0.14.0"}
+    ]
   end
 
   # Aliases are shortcuts or tasks specific to the current project.

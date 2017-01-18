@@ -7,6 +7,10 @@ defmodule SocialNetwork.Endpoint do
   #
   # You should set gzip to true if you are running phoenix.digest
   # when deploying your static files in production.
+  if Application.get_env(:social_network, :sql_sandbox) do
+    plug Phoenix.Ecto.SQL.Sandbox
+  end
+
   plug Plug.Static,
     at: "/", from: :social_network, gzip: false,
     only: ~w(css fonts images js uploads favicon.ico robots.txt)
