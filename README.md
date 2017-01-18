@@ -31,17 +31,21 @@ Feature
   * online notification persistence
   * new/delete post/comment/reply/thumb notifications of homepage and news page
   * comment or thumb on deleted post, re-delete post/comment and re-thumb notification are settled
-  * image upload should be less than 2MB, post and comment should be no more than 500 characters
+  * image upload should be less than 2MB, post and comment should be no more than 500 characters 
+
+Goal in short term
   
-To be done
-  
-  * make it dry in controllers and js, and test it by wallaby
   * friends homepage notification integration with news page
   * friend relationship change notification: new follower and following deleted
   * rewrite back button in friends page to be more concise
+  
+Goal in long term
+
+  * make it dry, and test it by wallaby
   * gif instuctions in this readme and online example
   * offline notification persistence
   * private chat and verification
+  * fewer limitations and hidden bugs
 
 Limitation
 
