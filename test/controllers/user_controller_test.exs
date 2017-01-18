@@ -1,9 +1,9 @@
 defmodule SocialNetwork.UserControllerTest do
   use SocialNetwork.ConnCase
 
-  alias SocialNetwork.User
-  @valid_attrs %{}
-  @invalid_attrs %{}
+  # alias SocialNetwork.User
+  # @valid_attrs %{}
+  # @invalid_attrs %{}
 
   # test "lists all entries on index", %{conn: conn} do
   #   conn = get conn, user_path(conn, :index)

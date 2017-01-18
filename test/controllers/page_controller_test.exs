@@ -1,8 +1,13 @@
 defmodule SocialNetwork.PageControllerTest do
-  use SocialNetwork.ConnCase
+  use SocialNetwork.IntegrationCase, async: true
 
-  # test "GET /", %{conn: conn} do
-  #   conn = get conn, "/"
-  #   assert html_response(conn, 200) =~ "Welcome to Phoenix!"
-  # end
+  test "GET /", %{session: session} do
+
+    welcome = 
+      session
+      |> visit("/")
+      |> find(".jumbotron")
+      |> text
+    assert welcome =~ "Welcome to Social Network!"
+  end
 end

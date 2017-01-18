@@ -1,9 +1,9 @@
 defmodule SocialNetwork.PostControllerTest do
   use SocialNetwork.ConnCase
 
-  alias SocialNetwork.Post
-  @valid_attrs %{}
-  @invalid_attrs %{}
+  # alias SocialNetwork.Post
+  # @valid_attrs %{}
+  # @invalid_attrs %{}
 
   # test "lists all entries on index", %{conn: conn} do
   #   conn = get conn, post_path(conn, :index)
