@@ -35,7 +35,7 @@ Feature
   
 To be done
   
-  * make it dry in controllers and js, move js in vendor to ES6, and test is by wallaby
+  * make it dry in controllers and js, move js in vendor to ES6, and test it by wallaby
   * gif instuctions in this readme and online example
   * friends homepage notification integration with news page
   * friend relationship change notification: new follower and following deleted
