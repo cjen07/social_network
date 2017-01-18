@@ -57,14 +57,19 @@
 <%= for post <- @posts do %>
   <% post_id = post["id"] %>
   <div class="panel panel-default panel-google-plus" id="<%= post_id %>">
-      <div class="panel-heading">
+      <% 
+        time = post["time"] 
+        user = post["user"]
+        name = user["name"]
+        email = user["email"]
+      %>
+      <div class="panel-heading" name="<%= name %>" email="<%= email %>" >
         <%= if @type == "2" do %>
-          <% user = post["user"] %>
-          <%= img_tag(Exgravatar.gravatar_url(user["email"], secure: false, s: 50), class: "img-circle avatar pull-left", alt: "user profile image")%>
-          <h3><%= user["name"] %></h3>
-          <h5><span><%= parse_time(post["time"]) %></span></h5>
+          <%= img_tag(Exgravatar.gravatar_url(email, secure: false, s: 50), class: "img-circle avatar pull-left", alt: "user profile image")%>
+          <h3 class="user"><%= name %></h3>
+          <h5><span><%= parse_time(time) %></span></h5>
         <% else %>
-          <h3><%= parse_time(post["time"]) %></h3> 
+          <h3><%= parse_time(time) %></h3> 
         <% end %>
       </div>
       <div class="panel-google-plus-button">
@@ -109,32 +114,35 @@
         <% comments = :erlang.binary_to_term(post["comments"]) %>
         <span id="comment_<%= post_id %>">
           <%= for piece <- comments do %>
-            <% user = piece["user"] %>
+            <%
+              user = piece["user"]
+              time = piece["time"]
+              email = user["email"]
+              name = user["name"]
+            %>
             <div class="comment">
                 <a class="pull-left">
-                    <%= img_tag(Exgravatar.gravatar_url(user["email"], secure: false, s: 50), class: "img-circle avatar", alt: "User Image")%>
+                    <%= img_tag(Exgravatar.gravatar_url(email, secure: false, s: 50), class: "img-circle avatar", alt: "User Image")%>
                 </a>
                 <div class="comment-body">
                     <div class="comment-heading">
-                        <h4 class="user"><%= user["name"] %></h4>
-                        <h5 class="time"><%= parse_time(piece["time"]) %></h5>
-                        <%= if user["email"] == Coherence.current_user(@conn).email do %>
-                          <% time = piece["time"] %>
+                        <h4 class="user"><%= name %></h4>
+                        <h5 class="time"><%= parse_time(time) %></h5>
+                        <%= if email == Coherence.current_user(@conn).email do %>
                           <button class="btn btn-default btn-comment-delete btn-xs" time="<%= time %>" id="<%= post_id %>">delete</button>
                         <% else %>
-                          <%
-                            time = piece["time"]
-                            email = user["email"]
-                            name = user["name"]
-                          %>
                           <button class="btn btn-default btn-comment-reply btn-xs" time="<%= time %>" name="<%= name %>" email="<%= email %>" id="<%= post_id %>">reply</button>
                         <% end %>
                     </div>
                     <%= if piece["refer"] == %{} do %>
                       <pre><%= piece["text"] %></pre>
                     <% else %>
-                      <% refer = "@" <> piece["refer"]["name"] <> ": " %>
-                      <pre><%= refer %><%= piece["text"] %></pre>
+                      <%
+                        name = piece["refer"]["name"]
+                        email = piece["refer"]["email"]
+                        refer = "@" <> piece["refer"]["name"] 
+                      %>
+                      <pre><a class="refer" name="<%= name %>" email="<%= email %>" flag="<%= email == Coherence.current_user(@conn).email %>"><%= refer %></a><%= ": " <> piece["text"] %></pre>
                     <% end %>
                 </div>
             </div>

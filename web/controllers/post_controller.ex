@@ -494,6 +494,7 @@ defmodule SocialNetwork.PostController do
     |> Enum.zip(refers)
     |> Enum.map(fn {c, r} -> Map.put(c, "refer", r) end)
     |> Enum.map(fn c -> Map.put(c, "self", c["user"]["email"] == Coherence.current_user(conn).email) end)
+    |> Enum.map(fn c -> Map.put(c, "email", Coherence.current_user(conn).email) end)
     
   end
 
@@ -617,6 +618,10 @@ defmodule SocialNetwork.PostController do
 
     Logger.info "here is deleted comment result"
     Logger.debug "#{inspect(result)}"
+
+    if result == [] do
+      render(conn, "comment.json", error: "the comment was already deleted")
+    end
 
     email0 = result |> Enum.map(fn x -> 
         refer = x["refer"]

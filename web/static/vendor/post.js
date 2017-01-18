@@ -128,7 +128,15 @@ $(function () {
             $text = $('<pre/>').text(e.text); 
           }
           else{
-            $text = $('<pre/>').text("@" + e.refer.name + ": " + e.text); 
+            var $refer = $('<a/>')
+                        .addClass("refer")
+                        .attr("flag", e.refer.email == e.email)
+                        .attr("name", e.refer.name)
+                        .attr("email", e.refer.email)
+                        .text("@" + e.refer.name);
+            $text = $('<pre/>')
+                    .text(": " + e.text)
+                    .prepend($refer);
           }       
           var $body = $('<div/>')
                        .addClass("comment-body")
@@ -202,7 +210,15 @@ $(function () {
             $text = $('<pre/>').text(e.text); 
           }
           else{
-            $text = $('<pre/>').text("@" + e.refer.name + ": " + e.text); 
+            var $refer = $('<a/>')
+                        .addClass("refer")
+                        .attr("flag", e.refer.email == e.email)
+                        .attr("name", e.refer.name)
+                        .attr("email", e.refer.email)
+                        .text("@" + e.refer.name);
+            $text = $('<pre/>')
+                    .text(": " + e.text)
+                    .prepend($refer);
           }       
           var $body = $('<div/>')
                        .addClass("comment-body")
@@ -216,6 +232,31 @@ $(function () {
           );
         });
       }, "json");
+  });
+
+  $(".panel-footer").on("click", '.user, .avatar', function(){
+    var $comment = $(this).closest(".comment");
+    var $button = $comment.find(".btn");
+    var email = $button.attr("email");
+    var name = $button.attr("name");
+    var url = (name == null) ? "/home" : "/hub?user[email]=" + encodeURIComponent(email) + "&user[name]=" + encodeURIComponent(name);
+    window.location.href = url;
+  });
+
+  $(".panel-heading > .user, .panel-heading > .avatar").click(function(){
+    var $heading = $(this).closest(".panel-heading");
+    var email = $heading.attr("email");
+    var name = $heading.attr("name");
+    var url = "/hub?user[email]=" + encodeURIComponent(email) + "&user[name]=" + encodeURIComponent(name);
+    window.location.href = url;
+  });
+
+  $(".panel-footer").on("click", '.refer', function(){
+    var flag = $(this).attr("flag")
+    var email = $(this).attr("email");
+    var name = $(this).attr("name");
+    var url = (flag == "true") ? "/home" : "/hub?user[email]=" + encodeURIComponent(email) + "&user[name]=" + encodeURIComponent(name);
+    window.location.href = url;
   });
 
   $("a.btn-post-delete").click(function(e){

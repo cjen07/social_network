@@ -672,7 +672,15 @@ function select_helper2(post_id, comment, thumb){
               $text = $('<pre/>').text(e.text) 
             }
             else{
-              $text = $('<pre/>').text("@" + e.refer.name + ": " + e.text) 
+              let $refer = $('<a/>')
+                        .addClass("refer")
+                        .attr("flag", e.refer.email == e.email)
+                        .attr("name", e.refer.name)
+                        .attr("email", e.refer.email)
+                        .text("@" + e.refer.name)
+              $text = $('<pre/>')
+                      .text(": " + e.text)
+                      .prepend($refer)
             }       
             let $body = $('<div/>')
                          .addClass("comment-body")
@@ -797,7 +805,15 @@ function select_helper3(post_id, reply){
               $text = $('<pre/>').text(e.text) 
             }
             else{
-              $text = $('<pre/>').text("@" + e.refer.name + ": " + e.text) 
+              let $refer = $('<a/>')
+                        .addClass("refer")
+                        .attr("flag", e.refer.email == e.email)
+                        .attr("name", e.refer.name)
+                        .attr("email", e.refer.email)
+                        .text("@" + e.refer.name)
+              $text = $('<pre/>')
+                      .text(": " + e.text)
+                      .prepend($refer)
             }       
             let $body = $('<div/>')
                          .addClass("comment-body")
