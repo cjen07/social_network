@@ -4,7 +4,7 @@ defmodule SocialNetwork.Mixfile do
   def project do
     [app: :social_network,
      version: "0.0.1",
-     elixir: "~> 1.2",
+     elixir: "~> 1.4",
      elixirc_paths: elixirc_paths(Mix.env),
      compilers: [:phoenix, :gettext] ++ Mix.compilers,
      build_embedded: Mix.env == :prod,
@@ -18,8 +18,7 @@ defmodule SocialNetwork.Mixfile do
   # Type `mix help compile.app` for more information.
   def application do
     [mod: {SocialNetwork, []},
-     applications: [:phoenix, :phoenix_pubsub, :phoenix_html, :cowboy, :logger, :gettext,
-                    :phoenix_ecto, :postgrex, :coherence, :bolt_sips, :crypto]]
+    extra_applications: [:logger, :crypto]]
   end
 
   # Specifies which paths to compile per environment.
