@@ -29,20 +29,19 @@ To start your Phoenix app:
 Feature
 
   * online notification persistence
-  * new/delete post/comment/reply/thumb notifications of homepage and news page
+  * new/delete post/comment/reply/thumb notifications of all pages
   * comment or thumb on deleted post, re-delete post/comment and re-thumb notification are settled
   * image upload should be less than 2MB, post and comment should be no more than 500 characters 
 
 Goal in short term
   
-  * friends homepage notification integration with news page
   * friend relationship change notification: new follower and following deleted
   * rewrite back button in friends page to be more concise
+  * gif instuctions in this readme and online example
   
 Goal in long term
 
   * make it dry, and test it by wallaby
-  * gif instuctions in this readme and online example
   * offline notification persistence
   * private chat and verification
   * fewer limitations and hidden bugs
@@ -50,9 +49,9 @@ Goal in long term
 Limitation
 
   * one comment can only be referred to one comment at one time using reply button
-  * if you want to be notified when you are replied, you have to follow the post owner
   * same user same time double comment on same post will resulted in undefined behaviour
   * only one image per post is allowed, audio/video not supported, post re-delivering not supported
+  * if A comments on B's post, A does not follow B, and anyone replies A in B's post and then B deletes that post, the notification in A's news page will not disappear, which is what "possibly" means in the notification.
   
 Bugs
   
