@@ -75,6 +75,16 @@ defmodule SocialNetwork.PostController do
 
   def friend(conn, %{"user" => user}) do
     email0 = user["email"]
+
+    cypher = """
+      MATCH (a:User {email: '#{email0}'})
+      RETURN a
+    """
+
+    user = Bolt.query!(Bolt.conn, cypher) |> Enum.map(fn x -> (x["a"]).properties end) |> Enum.at(0)
+
+    Logger.info "here is user"
+    Logger.debug "#{inspect(user)}"
     
     cypher = """
       MATCH (a:Post)-[:BELONGS_TO]->(b:User {email: '#{email0}'})
@@ -574,7 +584,7 @@ defmodule SocialNetwork.PostController do
 
       if email0 != "" and email0 != that_email do
 
-        SocialNetwork.Endpoint.broadcast("user:" <> email0, "new_reply", %{post_id: id, email: email, time: time, source: email0})
+        SocialNetwork.Endpoint.broadcast("user:" <> email0, "new_reply", %{post_id: id, email: email, time: time, source: that_email})
         
       end
 
@@ -584,7 +594,7 @@ defmodule SocialNetwork.PostController do
         Enum.map(comments, fn x -> 
           this_email = x["user"]["email"]
           if this_email != email do
-            SocialNetwork.Endpoint.broadcast("user:" <> this_email, "new_reply", %{post_id: id, email: email, time: time, source: this_email})
+            SocialNetwork.Endpoint.broadcast("user:" <> this_email, "new_reply", %{post_id: id, email: email, time: time, source: that_email})
           end
         end)
       end
@@ -667,7 +677,7 @@ defmodule SocialNetwork.PostController do
 
       if email0 != "" and email0 != that_email do
 
-        SocialNetwork.Endpoint.broadcast("user:" <> email0, "delete_reply", %{post_id: id, email: email, time: time, source: email0})
+        SocialNetwork.Endpoint.broadcast("user:" <> email0, "delete_reply", %{post_id: id, email: email, time: time, source: that_email})
         
       end 
 
@@ -677,7 +687,7 @@ defmodule SocialNetwork.PostController do
         Enum.map(comments, fn x -> 
           this_email = x["user"]["email"]
           if this_email != email do
-            SocialNetwork.Endpoint.broadcast("user:" <> this_email, "delete_reply", %{post_id: id, email: email, time: time, source: this_email})
+            SocialNetwork.Endpoint.broadcast("user:" <> this_email, "delete_reply", %{post_id: id, email: email, time: time, source: that_email})
           end
         end)
       end

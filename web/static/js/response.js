@@ -7,52 +7,68 @@ let response = {
     location.reload()
   },
 
-  put_news_message(m){
+  put_news_message(m, email0, friends){
     let list = $(".message-notification-list")
     for (let post_id in m){
       let cs = m[post_id]
       if (cs.length > 0){
+        let that_email = cs[0].source
+        if ((email0 == "" && friends.find(e => e.email == that_email)) || email0 == that_email){
+          let reply = 0
+        
+          cs.forEach(e => {
+            // remove new replies that is loaded for integrity
+            let email = e.email
+            ++reply
+            let time = e.time
+            let $reply = $("button[time='" + time + "'][email='" + email + "'][id='" + post_id + "']").closest('.comment')
+            $reply.remove()
+          })
 
-        let reply = 0
-      
-        cs.forEach(e => {
-          // remove new replies that is loaded for integrity
-          let email = e.email
-          ++reply
-          let time = e.time
-          let $reply = $("button[time='" + time + "'][email='" + email + "'][id='" + post_id + "']").closest('.comment')
-          $reply.remove()
-        })
-
-        let post = select_helper3(post_id, reply)
-        list.append(post)
+          let post = select_helper3(post_id, reply)
+          list.append(post)
+        }
+        else{
+          let reply = cs.length
+          let post = select_helper4(post_id, reply, that_email)
+          list.append(post)
+        }  
       }
     }
   },
 
-  pick_news_message(){
+  pick_news_message(email){
     let news = $(".nav-news")
 
     if (sessionStorage.getItem("news-flag") == "true"){
       let n = sessionStorage.getItem("news-data")
       let m = $.parseJSON(n)
       let reply = 0
+      let flag = false
       for (let post_id in m){
         let cs = m[post_id]
-        reply += cs.length
+        if (cs.length > 0){
+          if (cs[0].source != email){
+            reply += cs.length
+          }
+        }
       }
-      let counter = $('<span/>')
-                  .addClass("button-badge")
-                  .attr("reply", reply)
-                  .text(reply)
+      let counter = $('<span/>').addClass("button-badge")
+      if (reply != 0){
+        counter.attr("reply", reply).text(reply)
+        flag = true
+      }
 
       if (sessionStorage.getItem("post-flag") == "true"){
         let n = sessionStorage.getItem("post-data")
         let m = $.parseJSON(n)
         let post = m.length
         counter.attr("post", post)
+        if (!flag) {counter.text("$")}
+        flag = true
       }
-      news.append(counter)
+
+      if (flag){news.append(counter)}
     }
     else if (sessionStorage.getItem("post-flag") == "true"){
       let n = sessionStorage.getItem("post-data")
@@ -167,9 +183,10 @@ let response = {
     }
   },
 
-  new_reply(payload){
+  new_reply(payload, email0, friends){
     let post_id = payload.post_id
     let email = payload.email
+    let that_email = payload.source
     let list = $(".message-notification-list")
     let post = list.find("#" + post_id)
     if (sessionStorage.getItem("news-flag") != "true"){
@@ -180,35 +197,48 @@ let response = {
     let m = $.parseJSON(n)
     let id = post_id
     if (!post.length){
-      m[id] = [{email: email, source: payload.source, time: payload.time}]
-      post = select_helper3(post_id, 1)
-      list.append(post)
+      m[id] = [{email: email, source: that_email, time: payload.time}]
+      if (friends.find(e => e.email == that_email) || email0 == that_email){
+        post = select_helper3(post_id, 1)
+        list.append(post)
+      }
+      else{
+        post = select_helper4(post_id, 1, that_email)
+        list.append(post)
+      } 
     }
     else{
       let reply = Number.parseInt(post.attr("reply")) + 1
       let cs = m[id]
-      let c = {email: email, source: payload.source, time: payload.time}
+      let c = {email: email, source: that_email, time: payload.time}
       cs.push(c)
       m[id] = cs
-      post.attr("reply", reply)
-          .text("there are " + reply + " new replies in a post")
+      if (friends.find(e => e.email == that_email) || email0 == that_email){
+        post.attr("reply", reply)
+            .text("there are " + reply + " new replies in a post")
+      }
+      else{
+        post.attr("reply", reply)
+            .text("possibly " + reply + " new replies in a stranger's homepage")
+      }
+        
     }
     sessionStorage.setItem("news-data", JSON.stringify(m))
   },
 
-  delete_reply(payload){
+  delete_reply(payload, email0, friends){
     let id = payload.post_id
     let email = payload.email
+    let that_email = payload.source
     let list = $(".message-notification-list")
     let post = list.find("#" + id)
     if (!post.length) {return}
-
     let n = sessionStorage.getItem("news-data")
     let m = $.parseJSON(n)
 
     if (id in m){
       let cs = m[id]
-      let c = {email: email, source: payload.source, time: payload.time}
+      let c = {email: email, source: that_email, time: payload.time}
       let index = cs
       .map(e => JSON.stringify(e))
       .indexOf(JSON.stringify(c))
@@ -231,12 +261,24 @@ let response = {
           }
         }
         else{
-          let text = (reply == 1) ? "there is a new reply" : "there are " + reply + " new replies"
-          post.attr("reply", reply)
-            .text(text + " in a post")
+          if (friends.find(e => e.email == that_email) || email0 == that_email){
+            let text = (reply == 1) ? "there is a new reply" : "there are " + reply + " new replies"
+            post.attr("reply", reply)
+              .text(text + " in a post")
+          }
+          else{
+            let text = (reply == 1) ? "possibly a new reply" : "possibly " + reply + " new replies"
+            post.attr("reply", reply)
+              .text(text + " in a stranger's homepage")
+          }
         }
       }
     }
+  },
+
+  new_reply_delay_onsite(payload, email){
+    if (payload.email == email){return}
+    new_reply_delay(payload)
   },
 
   new_reply_delay(payload){
@@ -279,6 +321,11 @@ let response = {
         sessionStorage.setItem("news-data", JSON.stringify(m))
       }
     }
+  },
+
+  delete_reply_delay_onsite(payload, email){
+    if (payload.email == email){return}
+    delete_reply_delay(payload)
   },
 
   delete_reply_delay(payload){
@@ -676,6 +723,23 @@ function select_helper3(post_id, reply){
         }, "json")
       $(".panel[id='" + post_id + "']").scrollView()
       post.remove()
+    })
+  return post
+}
+
+function select_helper4(post_id, reply, email){
+  let text = (reply == 1) ? "possibly a new reply" : "possibly " + reply + " new replies"
+  let post = 
+  $('<li/>')
+    .addClass("alert alert-info")
+    .attr("role", "alert")
+    .attr("reply", reply)
+    .attr("id", post_id)
+    .text(text + " in a stranger's homepage")
+    .css('cursor', 'pointer')
+    .click( _ => {
+      let url = "/hub?user[email]=" + encodeURIComponent(email)
+      window.location.href = url
     })
   return post
 }

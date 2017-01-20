@@ -52,26 +52,50 @@ let self = {
           return friendChannel
         }
         if (!users.length){
-          myChannel.on("new_reply", response.new_reply_delay)
-          myChannel.on("delete_reply", response.delete_reply_delay)
 
-          response.pick_news_message()
+          if (user.length){
+            let email = user.attr('email')
+            let userChannel   = socket.channel("user:" + email)
+            if (!friends.find(e => e.email == email)){
+              userChannel.join()
+                .receive("ok", resp => console.log("joined a stranger channel", resp) )
+                .receive("error", reason => console.log("join a stranger channel failed", reason) )
+            }
+            userChannel.on("new_post", response.new_post)
+            userChannel.on("delete_post", response.delete_post)
+            myChannel.on("new_reply", e => response.new_reply(e, email, friends))
+            myChannel.on("delete_reply", e => response.delete_reply(e, email, friends))
+            myChannel.on("new_reply", e => response.new_reply_delay_onsite(e, email))
+            myChannel.on("delete_reply", e => response.delete_reply_delay_onsite(e, email))
+            response.pick_news_message(email)
+            if (sessionStorage.getItem("news-flag") == "true") {
+              let n = sessionStorage.getItem("news-data")
+              let m = $.parseJSON(n)
+              response.put_news_message(m, email, friends)
+            }
+          }
+          else{
+            myChannel.on("new_reply", response.new_reply_delay)
+            myChannel.on("delete_reply", response.delete_reply_delay)
+            response.pick_news_message("")
+          }
 
           friends.forEach(e => {
             let friendChannel = get_friends(e)
+            if (user.length && e.email == user.attr('email')){return}
             friendChannel.on("new_post", response.new_post_delay)
             friendChannel.on("delete_post", response.delete_post_delay)
           })
         }
         else{
-          myChannel.on("new_reply", response.new_reply)
-          myChannel.on("delete_reply", response.delete_reply)
+          myChannel.on("new_reply", e => response.new_reply(e, "", friends))
+          myChannel.on("delete_reply", e => response.delete_reply(e, "", friends))
 
           sessionStorage.setItem("post-flag", "false")
           if (sessionStorage.getItem("news-flag") == "true") {
             let n = sessionStorage.getItem("news-data")
             let m = $.parseJSON(n)
-            response.put_news_message(m)
+            response.put_news_message(m, "", friends)
           }
 
           friends.forEach(e => {
@@ -79,19 +103,6 @@ let self = {
             friendChannel.on("new_post", response.new_post)
             friendChannel.on("delete_post", response.delete_post)
           })
-        }
-        if (user.length){
-          let email = user.attr('email')
-          let userChannel   = socket.channel("user:" + email)
-          if (!friends.find(e => e.email == email)){
-            userChannel.join()
-              .receive("ok", resp => console.log("joined a stranger channel", resp) )
-              .receive("error", reason => console.log("join a stranger channel failed", reason) )
-          }
-          userChannel.on("new_post", response.new_post)
-          userChannel.on("delete_post", response.delete_post)
-          myChannel.on("new_reply", response.new_reply)
-          myChannel.on("delete_reply", response.delete_reply)
         }
       }, "json")
     
