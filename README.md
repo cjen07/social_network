@@ -37,14 +37,13 @@ Feature
 
 Goal in short term
   
-  * rewrite back button in friends page to be more concise
   * gif instuctions in this readme and online example
+  * private chat, XMPP server and client, hedwig-im and ejabberd
   
 Goal in long term
 
-  * make it dry, and test it by wallaby
   * offline notification persistence
-  * private chat and verification
+  * make it dry, and test it by wallaby
   * fewer limitations and hidden bugs
 
 Limitation
