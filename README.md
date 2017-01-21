@@ -30,12 +30,13 @@ Feature
 
   * online notification persistence
   * new/delete post/comment/reply/thumb notifications of all pages
+  * friend relationship change notification: new follower and following deleted
   * comment or thumb on deleted post, re-delete post/comment and re-thumb notification are settled
+  * re-follow and re-unfollow are settled, home, following, follower, follow/unfollow of a deleted user are prevented
   * image upload should be less than 2MB, post and comment should be no more than 500 characters 
 
 Goal in short term
   
-  * friend relationship change notification: new follower and following deleted
   * rewrite back button in friends page to be more concise
   * gif instuctions in this readme and online example
   
@@ -52,6 +53,7 @@ Limitation
   * same user same time double comment on same post will resulted in undefined behaviour
   * only one image per post is allowed, audio/video not supported, post re-delivering not supported
   * if A comments on B's post, A does not follow B, and anyone replies A in B's post and then B deletes that post, the notification in A's news page will not disappear, which is what "possibly" means in the notification.
+  * if A follows B, and B does not follow A and then A deletes his/her account, the "new follower" notification in B's friend page will not disappear 
   
 Bugs
   
