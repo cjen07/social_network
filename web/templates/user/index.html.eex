@@ -2,7 +2,7 @@
 <%= if @search do %>
   <h2>Search results</h2>
 <% else %>
-  <% [h|_] = :erlang.binary_to_term(@now) %>
+  <% h = :erlang.binary_to_term(@now) %>
   <%= if @fof do %>
     <%= if h["email"] == Coherence.current_user(@conn).email do %>
       <%= if h["type"] == "0" do %>
@@ -84,7 +84,7 @@
                 <%= link "follow", to: user_path(@conn, :follow, %{:user => user, :now => @now}), method: :post, data: [confirm: "Are you sure?"], class: "btn btn-warning btn-xs" %>
               <% end %>
             <% else %>
-              <%= link "Unfollow", to: user_path(@conn, :unfollow, %{:user => user, :now => :erlang.term_to_binary([])}), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-danger btn-xs" %>
+              <%= link "Unfollow", to: user_path(@conn, :unfollow, %{:user => user, :now => :erlang.term_to_binary(nil)}), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-danger btn-xs" %>
             <% end %>
           <% end %>
         <% end %>
@@ -97,22 +97,7 @@
 
 <% end %>
 
-<%= link "Search friends", to: user_path(@conn, :search_form, %{:fof => @fof, :now => @now}) %>
-<%= if @fof do %>
-  |
-  <% [_|t] = :erlang.binary_to_term(@now) %>
-  <% [m|n] = t %>
-  <%= if m["email"] == Coherence.current_user(@conn).email and m["type"] == nil do %>
-    <%= link "Back", to: user_path(@conn, :index) %>
-  <% else %>
-    <%= if m["search"] do %>
-      <%= link "Back", to: user_path(@conn, :search_submit, %{:search => m}), method: :post %>
-    <% else %>
-      <% n = :erlang.term_to_binary(n) %>
-      <%= link "Back", to: user_path(@conn, :friends_of_friends, %{:user => m, :now => n}) %>
-    <% end %>
-  <% end %>
-<% end %>
+<%= link "Search friends", to: user_path(@conn, :search_form) %>
 <%= if @search do %>
   |
   <%= link "Back", to: user_path(@conn, :index) %>

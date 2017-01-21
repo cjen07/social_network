@@ -22,7 +22,7 @@ defmodule SocialNetwork.UserController do
     Logger.debug "#{inspect(result)}"
 
     users = result
-    now = :erlang.term_to_binary([%{"name" => username, "email" => email}])
+    now = :erlang.term_to_binary(%{"name" => username, "email" => email})
     render(conn, "index.html", users: users,
       now: now, fof: false, search: false)
 
@@ -48,10 +48,8 @@ defmodule SocialNetwork.UserController do
     render(conn, "friends.json", friends: friends)
   end
 
-  def search_form(conn, %{"fof" => fof, "now" => now}) do
-    Logger.info "Here is the fof."
-    Logger.debug "#{inspect(fof)}"
-    render(conn, "search.html", fof: fof == "true", now: now)
+  def search_form(conn, _params) do
+    render(conn, "search.html")
   end
 
   def search_submit(conn, %{"search" => search}) do
@@ -107,7 +105,7 @@ defmodule SocialNetwork.UserController do
     Logger.debug "#{inspect(result2)}"
 
     users = result2
-    now = :erlang.term_to_binary([Map.put(search, "search", true)])
+    now = :erlang.term_to_binary(Map.put(search, "search", true))
     render(conn, "index.html", users: users, search: true,
      fof: false, now: now)
 
@@ -132,9 +130,9 @@ defmodule SocialNetwork.UserController do
       RETURN a
     """
 
-    user = Bolt.query!(Bolt.conn, cypher) |> Enum.map(fn x -> (x["a"]).properties end) |> Enum.at(0)
+    user1 = Bolt.query!(Bolt.conn, cypher) |> Enum.map(fn x -> (x["a"]).properties end) |> Enum.at(0)
 
-    if user == nil do
+    if user1 == nil do
       conn
       |> put_flash(:warning, "that user was already deleted.")
       |> redirect(to: user_path(conn, :index))
@@ -178,7 +176,7 @@ defmodule SocialNetwork.UserController do
       Logger.debug "#{inspect(result2)}"
 
       users = result2
-      now = :erlang.term_to_binary([user | :erlang.binary_to_term(now)])
+      now = :erlang.term_to_binary(user)
       render(conn, "index.html", users: users, now: now, fof: true, search: false)
 
     end
@@ -278,17 +276,16 @@ defmodule SocialNetwork.UserController do
       Logger.debug "#{inspect(result)}"
 
       if result != [] do
-        [h|t] = :erlang.binary_to_term(now)
+        h = :erlang.binary_to_term(now)
 
         if h["search"] do
           conn
           |> put_flash(:warning, "Friend is alrealy followed.")
           |> search_submit_helper(h)
         else
-          t = :erlang.term_to_binary(t)
           conn
           |> put_flash(:warning, "Friend is alrealy followed.")
-          |> redirect(to: user_path(conn, :friends_of_friends, %{:user => h, :now => t}))
+          |> redirect(to: user_path(conn, :friends_of_friends, %{:user => h, :now => now}))
         end
       else
         cypher = """
@@ -301,17 +298,16 @@ defmodule SocialNetwork.UserController do
 
         SocialNetwork.Endpoint.broadcast("user:" <> email1, "new_follower", %{name: username0, email: email0})
 
-        [h|t] = :erlang.binary_to_term(now)
+        h = :erlang.binary_to_term(now)
 
         if h["search"] do
           conn
           |> put_flash(:info, "Friend followed successfully.")
           |> search_submit_helper(h)
         else
-          t = :erlang.term_to_binary(t)
           conn
           |> put_flash(:info, "Friend followed successfully.")
-          |> redirect(to: user_path(conn, :friends_of_friends, %{:user => h, :now => t}))
+          |> redirect(to: user_path(conn, :friends_of_friends, %{:user => h, :now => now}))
         end
       end
     end
@@ -410,22 +406,20 @@ defmodule SocialNetwork.UserController do
       Logger.debug "#{inspect(result)}"
 
       if result == [] do
-        now = :erlang.binary_to_term(now)
-        if now == [] do
+        h = :erlang.binary_to_term(now)
+        if h == nil do
           conn
           |> put_flash(:warning, "Friend is alrealy unfollowed.")
           |> redirect(to: user_path(conn, :index))
         else
-          [h|t] = now
           if h["search"] do
             conn
             |> put_flash(:warning, "Friend is alrealy unfollowed.")
             |> search_submit_helper(h)
           else
-            t = :erlang.term_to_binary(t)
             conn
             |> put_flash(:warning, "Friend is alrealy unfollowed.")
-            |> redirect(to: user_path(conn, :friends_of_friends, %{:user => h, :now => t}))
+            |> redirect(to: user_path(conn, :friends_of_friends, %{:user => h, :now => now}))
           end
         end
       else
@@ -439,23 +433,21 @@ defmodule SocialNetwork.UserController do
 
         SocialNetwork.Endpoint.broadcast("user:" <> email1, "delete_follower", %{name: username0, email: email0})
 
-        now = :erlang.binary_to_term(now)
+        h = :erlang.binary_to_term(now)
 
-        if now == [] do
+        if h == nil do
           conn
           |> put_flash(:info, "Friend unfollowed successfully.")
           |> redirect(to: user_path(conn, :index))
         else
-          [h|t] = now
           if h["search"] do
             conn
             |> put_flash(:info, "Friend unfollowed successfully.")
             |> search_submit_helper(h)
           else
-            t = :erlang.term_to_binary(t)
             conn
             |> put_flash(:info, "Friend unfollowed successfully.")
-            |> redirect(to: user_path(conn, :friends_of_friends, %{:user => h, :now => t}))
+            |> redirect(to: user_path(conn, :friends_of_friends, %{:user => h, :now => now}))
           end
         end
       end
