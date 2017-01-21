@@ -1,18 +1,23 @@
 import helper from "./helper"
 
-if ( sessionStorage.getItem("warning") == "true" ) {
-  $(".alert-warning").text("updated by another endpoint")
-  sessionStorage.setItem("warning", "false")
-}
+$(document).ready(function() {
+  if ( sessionStorage.getItem("warning") == "true" ) {
+    $(".alert-warning").text("updated by another endpoint")
+    sessionStorage.setItem("warning", "false")
+  }
 
-let offset = 10
-let duration = 300
+  let offset = 10
 
-if ($(this).scrollTop() < offset) {
-  $('.back-to-top').hide()
-}
+  if ($(this).scrollTop() < offset) {
+    $('.back-to-top').hide()
+  }
+})  
 
 $(window).scroll(function() {
+
+  let offset = 10
+  let duration = 300
+
   if ($(this).scrollTop() > offset) {
     $('.back-to-top').fadeIn(duration)
   } else {

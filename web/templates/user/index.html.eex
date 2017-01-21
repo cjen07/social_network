@@ -1,3 +1,4 @@
+<div class="friendChannel" style="hidden"></div>
 <%= if @search do %>
   <h2>Search results</h2>
 <% else %>

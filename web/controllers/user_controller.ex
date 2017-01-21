@@ -127,47 +127,61 @@ defmodule SocialNetwork.UserController do
     email1 = user["email"]
     Logger.debug "#{inspect(username1)} and #{inspect(email1)}"
 
-    cypher = 
-      cond do
-        user["type"] == "0" ->
-          """
-            MATCH (a:User {email: '#{email1}'})-[:FOLLOWS]->(b)
-            RETURN b
-          """
-        :true ->
-          """
-            MATCH (a:User {email: '#{email1}'})<-[:FOLLOWS]-(b)
-            RETURN b
-          """
-      end
+    cypher = """
+      MATCH (a:User {email: '#{email1}'})
+      RETURN a
+    """
 
-    result0 = 
-      Bolt.query!(Bolt.conn, cypher) 
-      |> Enum.map(fn x -> (x["b"]).properties end) 
+    user = Bolt.query!(Bolt.conn, cypher) |> Enum.map(fn x -> (x["a"]).properties end) |> Enum.at(0)
 
-    Logger.info "Here is the result0."
-    Logger.debug "#{inspect(result0)}"
+    if user == nil do
+      conn
+      |> put_flash(:warning, "that user was already deleted.")
+      |> redirect(to: user_path(conn, :index))
+    else
+      cypher = 
+        cond do
+          user["type"] == "0" ->
+            """
+              MATCH (a:User {email: '#{email1}'})-[:FOLLOWS]->(b)
+              RETURN b
+            """
+          :true ->
+            """
+              MATCH (a:User {email: '#{email1}'})<-[:FOLLOWS]-(b)
+              RETURN b
+            """
+        end
 
-    result1 = Enum.map(result0, fn x -> 
-      email = x["email"]
-      cypher = """
-        MATCH (a:User {email: '#{email0}'})-[r:FOLLOWS]->(b:User {email: '#{email}'})
-        RETURN r
-      """
-      Bolt.query!(Bolt.conn, cypher) != []
-    end)
+      result0 = 
+        Bolt.query!(Bolt.conn, cypher) 
+        |> Enum.map(fn x -> (x["b"]).properties end) 
 
-    Logger.info "Here is the result1."
-    Logger.debug "#{inspect(result1)}"
+      Logger.info "Here is the result0."
+      Logger.debug "#{inspect(result0)}"
 
-    result2 = Enum.zip(result0, result1) |> Enum.map(fn {x, e} -> Map.put(x, "flag", e) end)
+      result1 = Enum.map(result0, fn x -> 
+        email = x["email"]
+        cypher = """
+          MATCH (a:User {email: '#{email0}'})-[r:FOLLOWS]->(b:User {email: '#{email}'})
+          RETURN r
+        """
+        Bolt.query!(Bolt.conn, cypher) != []
+      end)
 
-    Logger.info "Here is the result2."
-    Logger.debug "#{inspect(result2)}"
+      Logger.info "Here is the result1."
+      Logger.debug "#{inspect(result1)}"
 
-    users = result2
-    now = :erlang.term_to_binary([user | :erlang.binary_to_term(now)])
-    render(conn, "index.html", users: users, now: now, fof: true, search: false)
+      result2 = Enum.zip(result0, result1) |> Enum.map(fn {x, e} -> Map.put(x, "flag", e) end)
+
+      Logger.info "Here is the result2."
+      Logger.debug "#{inspect(result2)}"
+
+      users = result2
+      now = :erlang.term_to_binary([user | :erlang.binary_to_term(now)])
+      render(conn, "index.html", users: users, now: now, fof: true, search: false)
+
+    end
 
   end
 
@@ -186,17 +200,46 @@ defmodule SocialNetwork.UserController do
     Logger.debug "#{inspect(username1)} and #{inspect(email1)}"
 
     cypher = """
-      MATCH (a:User {email: '#{email0}'}),(b:User {email: '#{email1}'})
-      CREATE (a)-[:FOLLOWS]->(b)
+      MATCH (a:User {email: '#{email1}'})
+      RETURN a
     """
-    result = Bolt.query!(Bolt.conn, cypher)
-    Logger.info "Here is the result."
-    Logger.debug "#{inspect(result)}"
 
-    conn
-    |> put_flash(:info, "Friend followed successfully.")
-    |> redirect(to: post_path(conn, :friend, %{:user => user}))
-    
+    user = Bolt.query!(Bolt.conn, cypher) |> Enum.map(fn x -> (x["a"]).properties end) |> Enum.at(0)
+
+    if user == nil do
+      conn
+      |> put_flash(:warning, "that user was already deleted.")
+      |> redirect(to: user_path(conn, :index))
+    else
+
+      cypher = """
+        MATCH (a:User {email: '#{email0}'})-[r:FOLLOWS]->(b:User {email: '#{email1}'})
+        RETURN r
+      """
+      result = Bolt.query!(Bolt.conn, cypher)
+      Logger.info "Here is checked result."
+      Logger.debug "#{inspect(result)}"
+
+      if result != [] do
+        conn
+        |> put_flash(:warning, "Friend is alrealy followed.")
+        |> redirect(to: post_path(conn, :friend, %{:user => user}))
+      else
+        cypher = """
+          MATCH (a:User {email: '#{email0}'}),(b:User {email: '#{email1}'})
+          CREATE (a)-[:FOLLOWS]->(b)
+        """
+        result = Bolt.query!(Bolt.conn, cypher)
+        Logger.info "Here is the result."
+        Logger.debug "#{inspect(result)}"
+
+        SocialNetwork.Endpoint.broadcast("user:" <> email1, "new_follower", %{name: username0, email: email0})
+
+        conn
+        |> put_flash(:info, "Friend followed successfully.")
+        |> redirect(to: post_path(conn, :friend, %{:user => user}))
+      end
+    end
   end
 
   def follow(conn, %{"user" => user, "now" => now}) do
@@ -214,26 +257,64 @@ defmodule SocialNetwork.UserController do
     Logger.debug "#{inspect(username1)} and #{inspect(email1)}"
 
     cypher = """
-      MATCH (a:User {email: '#{email0}'}),(b:User {email: '#{email1}'})
-      CREATE (a)-[:FOLLOWS]->(b)
+      MATCH (a:User {email: '#{email1}'})
+      RETURN a
     """
-    result = Bolt.query!(Bolt.conn, cypher)
-    Logger.info "Here is the result."
-    Logger.debug "#{inspect(result)}"
 
-    [h|t] = :erlang.binary_to_term(now)
+    user = Bolt.query!(Bolt.conn, cypher) |> Enum.map(fn x -> (x["a"]).properties end) |> Enum.at(0)
 
-    if h["search"] do
+    if user == nil do
       conn
-      |> put_flash(:info, "Friend followed successfully.")
-      |> search_submit_helper(h)
+      |> put_flash(:warning, "that user was already deleted.")
+      |> redirect(to: user_path(conn, :index))
     else
-      t = :erlang.term_to_binary(t)
-      conn
-      |> put_flash(:info, "Friend followed successfully.")
-      |> redirect(to: user_path(conn, :friends_of_friends, %{:user => h, :now => t}))
-    end
 
+      cypher = """
+        MATCH (a:User {email: '#{email0}'})-[r:FOLLOWS]->(b:User {email: '#{email1}'})
+        RETURN r
+      """
+      result = Bolt.query!(Bolt.conn, cypher)
+      Logger.info "Here is checked result."
+      Logger.debug "#{inspect(result)}"
+
+      if result != [] do
+        [h|t] = :erlang.binary_to_term(now)
+
+        if h["search"] do
+          conn
+          |> put_flash(:warning, "Friend is alrealy followed.")
+          |> search_submit_helper(h)
+        else
+          t = :erlang.term_to_binary(t)
+          conn
+          |> put_flash(:warning, "Friend is alrealy followed.")
+          |> redirect(to: user_path(conn, :friends_of_friends, %{:user => h, :now => t}))
+        end
+      else
+        cypher = """
+          MATCH (a:User {email: '#{email0}'}),(b:User {email: '#{email1}'})
+          CREATE (a)-[:FOLLOWS]->(b)
+        """
+        result = Bolt.query!(Bolt.conn, cypher)
+        Logger.info "Here is the result."
+        Logger.debug "#{inspect(result)}"
+
+        SocialNetwork.Endpoint.broadcast("user:" <> email1, "new_follower", %{name: username0, email: email0})
+
+        [h|t] = :erlang.binary_to_term(now)
+
+        if h["search"] do
+          conn
+          |> put_flash(:info, "Friend followed successfully.")
+          |> search_submit_helper(h)
+        else
+          t = :erlang.term_to_binary(t)
+          conn
+          |> put_flash(:info, "Friend followed successfully.")
+          |> redirect(to: user_path(conn, :friends_of_friends, %{:user => h, :now => t}))
+        end
+      end
+    end
   end
 
   def unfollow_onsite(conn, %{"user" => user}) do
@@ -251,17 +332,46 @@ defmodule SocialNetwork.UserController do
     Logger.debug "#{inspect(username1)} and #{inspect(email1)}"
 
     cypher = """
-      MATCH (a:User {email: '#{email0}'})-[r:FOLLOWS]->(b:User {email: '#{email1}'})
-      DELETE r
+      MATCH (a:User {email: '#{email1}'})
+      RETURN a
     """
-    result = Bolt.query!(Bolt.conn, cypher)
-    Logger.info "Here is the result."
-    Logger.debug "#{inspect(result)}"
 
-    conn
-    |> put_flash(:info, "Friend unfollowed successfully.")
-    |> redirect(to: post_path(conn, :friend, %{:user => user}))
-    
+    user = Bolt.query!(Bolt.conn, cypher) |> Enum.map(fn x -> (x["a"]).properties end) |> Enum.at(0)
+
+    if user == nil do
+      conn
+      |> put_flash(:warning, "that user was already deleted.")
+      |> redirect(to: user_path(conn, :index))
+    else
+
+      cypher = """
+        MATCH (a:User {email: '#{email0}'})-[r:FOLLOWS]->(b:User {email: '#{email1}'})
+        RETURN r
+      """
+      result = Bolt.query!(Bolt.conn, cypher)
+      Logger.info "Here is checked result."
+      Logger.debug "#{inspect(result)}"
+
+      if result == [] do
+        conn
+        |> put_flash(:warning, "Friend is alrealy unfollowed.")
+        |> redirect(to: post_path(conn, :friend, %{:user => user}))
+      else
+       cypher = """
+          MATCH (a:User {email: '#{email0}'})-[r:FOLLOWS]->(b:User {email: '#{email1}'})
+          DELETE r
+        """
+        result = Bolt.query!(Bolt.conn, cypher)
+        Logger.info "Here is the result."
+        Logger.debug "#{inspect(result)}"
+
+        SocialNetwork.Endpoint.broadcast("user:" <> email1, "delete_follower", %{name: username0, email: email0})
+
+        conn
+        |> put_flash(:info, "Friend unfollowed successfully.")
+        |> redirect(to: post_path(conn, :friend, %{:user => user}))
+      end
+    end
   end
 
   def unfollow(conn, %{"user" => user, "now" => now}) do
@@ -279,33 +389,77 @@ defmodule SocialNetwork.UserController do
     Logger.debug "#{inspect(username1)} and #{inspect(email1)}"
 
     cypher = """
-      MATCH (a:User {email: '#{email0}'})-[r:FOLLOWS]->(b:User {email: '#{email1}'})
-      DELETE r
+      MATCH (a:User {email: '#{email1}'})
+      RETURN a
     """
-    result = Bolt.query!(Bolt.conn, cypher)
-    Logger.info "Here is the result."
-    Logger.debug "#{inspect(result)}"
 
-    now = :erlang.binary_to_term(now)
+    user = Bolt.query!(Bolt.conn, cypher) |> Enum.map(fn x -> (x["a"]).properties end) |> Enum.at(0)
 
-    if now == [] do
+    if user == nil do
       conn
-      |> put_flash(:info, "Friend unfollowed successfully.")
+      |> put_flash(:warning, "that user was already deleted.")
       |> redirect(to: user_path(conn, :index))
     else
-      [h|t] = now
-      if h["search"] do
-        conn
-        |> put_flash(:info, "Friend unfollowed successfully.")
-        |> search_submit_helper(h)
+
+      cypher = """
+        MATCH (a:User {email: '#{email0}'})-[r:FOLLOWS]->(b:User {email: '#{email1}'})
+        RETURN r
+      """
+      result = Bolt.query!(Bolt.conn, cypher)
+      Logger.info "Here is checked result."
+      Logger.debug "#{inspect(result)}"
+
+      if result == [] do
+        now = :erlang.binary_to_term(now)
+        if now == [] do
+          conn
+          |> put_flash(:warning, "Friend is alrealy unfollowed.")
+          |> redirect(to: user_path(conn, :index))
+        else
+          [h|t] = now
+          if h["search"] do
+            conn
+            |> put_flash(:warning, "Friend is alrealy unfollowed.")
+            |> search_submit_helper(h)
+          else
+            t = :erlang.term_to_binary(t)
+            conn
+            |> put_flash(:warning, "Friend is alrealy unfollowed.")
+            |> redirect(to: user_path(conn, :friends_of_friends, %{:user => h, :now => t}))
+          end
+        end
       else
-        t = :erlang.term_to_binary(t)
-        conn
-        |> put_flash(:info, "Friend unfollowed successfully.")
-        |> redirect(to: user_path(conn, :friends_of_friends, %{:user => h, :now => t}))
+        cypher = """
+          MATCH (a:User {email: '#{email0}'})-[r:FOLLOWS]->(b:User {email: '#{email1}'})
+          DELETE r
+        """
+        result = Bolt.query!(Bolt.conn, cypher)
+        Logger.info "Here is the result."
+        Logger.debug "#{inspect(result)}"
+
+        SocialNetwork.Endpoint.broadcast("user:" <> email1, "delete_follower", %{name: username0, email: email0})
+
+        now = :erlang.binary_to_term(now)
+
+        if now == [] do
+          conn
+          |> put_flash(:info, "Friend unfollowed successfully.")
+          |> redirect(to: user_path(conn, :index))
+        else
+          [h|t] = now
+          if h["search"] do
+            conn
+            |> put_flash(:info, "Friend unfollowed successfully.")
+            |> search_submit_helper(h)
+          else
+            t = :erlang.term_to_binary(t)
+            conn
+            |> put_flash(:info, "Friend unfollowed successfully.")
+            |> redirect(to: user_path(conn, :friends_of_friends, %{:user => h, :now => t}))
+          end
+        end
       end
     end
-
   end
 
 end

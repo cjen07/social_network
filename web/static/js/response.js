@@ -7,6 +7,116 @@ let response = {
     location.reload()
   },
 
+  put_friend_message(m){
+    let list = $(".message-notification-list")
+    for (let i in m){
+      let term = m[i]
+      let name = term.name
+      let email = term.email
+      let type = term.type
+      let message = select_helper5(name, email, type)
+      list.append(message)
+    }
+  },
+
+  new_follower(payload){
+    let list = $(".message-notification-list")
+    let name = payload.name
+    let email = payload.email
+    let message = select_helper5(name, email, "new")
+    list.append(message)
+  },
+
+  new_follower_delay(payload){
+    let friend = $(".nav-users")
+    let counter = friend.find(".button-badge")
+    if (sessionStorage.getItem("friend-flag") == "true"){
+      let n = sessionStorage.getItem("friend-data")
+      let m = $.parseJSON(n)
+      m.push({name: payload.name, email: payload.email, type: "new"})
+      sessionStorage.setItem("friend-data", JSON.stringify(m))
+      let message = Number.parseInt(counter.attr("message")) + 1
+      counter.attr("message", message).text(message)
+    }
+    else{
+      sessionStorage.setItem("friend-flag", "true")
+      let m = [{name: payload.name, email: payload.email, type: "new"}]
+      sessionStorage.setItem("friend-data", JSON.stringify(m))
+      counter = $('<span/>')
+                  .addClass("button-badge")
+                  .attr("message", 1)
+                  .text(1)
+      friend.append(counter)
+    }
+  },
+
+  delete_follower(payload){
+    let list = $(".message-notification-list")
+    let message = list.find(".alert-info[email='" + payload.email + "']")
+    if (message.length) {message.remove()}
+  },
+
+  delete_follower_delay(payload){
+    let friend = $(".nav-users")
+    let counter = friend.find(".button-badge")
+    if (sessionStorage.getItem("friend-flag") == "true"){
+      let n = sessionStorage.getItem("friend-data")
+      let m = $.parseJSON(n)
+      let index = m.findIndex(e => e.type == "new" && e.email == payload.email)
+      if (index > -1){
+        m.splice(index, 1)
+        sessionStorage.setItem("friend-data", JSON.stringify(m))
+        if (m.length > 0){
+          let message = Number.parseInt(counter.attr("message")) - 1
+          counter.attr("message", message).text(message)
+        }
+        else{
+          sessionStorage.setItem("friend-flag", "false")
+          counter.remove()
+        }
+      }
+    }
+  },
+
+  delete_user(payload){
+    let list = $(".message-notification-list")
+    let name = payload.name
+    let email = payload.email
+    let new_message = list.find(".alert-info[email='" + email + "']")
+    if (new_message.length) {new_message.remove()}
+    let message = select_helper5(name, email, "delete")
+    list.append(message)
+  },
+
+  delete_user_delay(payload){
+    let friend = $(".nav-users")
+    let counter = friend.find(".button-badge")
+    if (sessionStorage.getItem("friend-flag") == "true"){
+      let n = sessionStorage.getItem("friend-data")
+      let m = $.parseJSON(n)
+      m.push({name: payload.name, email: payload.email, type: "delete"})
+      sessionStorage.setItem("friend-data", JSON.stringify(m))
+      let message = Number.parseInt(counter.attr("message")) + 1
+      let index = m.findIndex(e => e.type == "new" && e.email == payload.email)
+      if (index > -1){
+        m.splice(index, 1)
+        sessionStorage.setItem("friend-data", JSON.stringify(m))
+        message -= 1
+      }
+      counter.attr("message", message).text(message)
+    }
+    else{
+      sessionStorage.setItem("friend-flag", "true")
+      let m = [{name: payload.name, email: payload.email, type: "delete"}]
+      sessionStorage.setItem("friend-data", JSON.stringify(m))
+      counter = $('<span/>')
+                  .addClass("button-badge")
+                  .attr("message", 1)
+                  .text(1)
+      friend.append(counter)
+    }
+  },
+
   put_news_message(m, email0, friends){
     let list = $(".message-notification-list")
     for (let post_id in m){
@@ -742,6 +852,14 @@ function select_helper4(post_id, reply, email){
       window.location.href = url
     })
   return post
+}
+
+function select_helper5(name, email, type){
+  let text = (type == "delete") ? name + "'s account was deleted" : "you have a new follower: " + name
+  let message = $('<li/>')
+  if (type == "delete") {message.addClass("alert alert-danger")} else {message.addClass("alert alert-info")}
+  message.attr("email", email).text(text).css('cursor', 'pointer').click( _ => message.remove())
+  return message
 }
 
 $.fn.scrollView = function () {

@@ -83,97 +83,103 @@ defmodule SocialNetwork.PostController do
 
     user = Bolt.query!(Bolt.conn, cypher) |> Enum.map(fn x -> (x["a"]).properties end) |> Enum.at(0)
 
-    Logger.info "here is user"
-    Logger.debug "#{inspect(user)}"
-    
-    cypher = """
-      MATCH (a:Post)-[:BELONGS_TO]->(b:User {email: '#{email0}'})
-      RETURN a
-      ORDER BY a.time DESC
-    """
-    result0 = Bolt.query!(Bolt.conn, cypher) |> Enum.map(fn x -> (x["a"]).properties end)
-
-    Logger.info "here is result0"
-    Logger.debug "#{inspect(result0)}"
-
-    email = Coherence.current_user(conn).email
-
-    result1 = Enum.map(result0, fn x -> 
-      id = x["id"]
+    if user == nil do
+      conn
+      |> put_flash(:warning, "that user was already deleted.")
+      |> redirect(to: user_path(conn, :index))
+    else
+      Logger.info "here is user"
+      Logger.debug "#{inspect(user)}"
+      
       cypher = """
-        MATCH (a:Post {id: #{id}})<-[b:THUMBED]-(c:User {email: '#{email}'})
-        RETURN b
+        MATCH (a:Post)-[:BELONGS_TO]->(b:User {email: '#{email0}'})
+        RETURN a
+        ORDER BY a.time DESC
       """
-      Bolt.query!(Bolt.conn, cypher) != []
-    end)
+      result0 = Bolt.query!(Bolt.conn, cypher) |> Enum.map(fn x -> (x["a"]).properties end)
 
-    Logger.info "Here is the result1."
-    Logger.debug "#{inspect(result1)}"
+      Logger.info "here is result0"
+      Logger.debug "#{inspect(result0)}"
 
-    result2 = Enum.zip(result0, result1) |> Enum.map(fn {x, e} -> Map.put(x, "thumbed", e) end)
+      email = Coherence.current_user(conn).email
 
-    Logger.info "Here is the result2."
-    Logger.debug "#{inspect(result2)}"
+      result1 = Enum.map(result0, fn x -> 
+        id = x["id"]
+        cypher = """
+          MATCH (a:Post {id: #{id}})<-[b:THUMBED]-(c:User {email: '#{email}'})
+          RETURN b
+        """
+        Bolt.query!(Bolt.conn, cypher) != []
+      end)
 
-    result3 = Enum.map(result2, fn x ->
-      id = x["id"]
-      cypher = """
-        MATCH (a:Post {id: #{id}})<-[b:THUMBED]-(c:User)
-        RETURN c
-        ORDER BY b.time
-      """
-      result = Bolt.query!(Bolt.conn, cypher) |> Enum.map(fn x -> (x["c"]).properties end)
-
-      Logger.info "here is thumbed result"
-      Logger.debug "#{inspect(result)}"
-
-      cypher = """
-        MATCH (a:Post {id: #{id}})<-[:POINTS_TO]-(b:Comment)-[:BELONGS_TO]->(c:User)
-        OPTIONAL MATCH (b)-[:REFERS_TO]->(d:User)
-        RETURN b AS comment, c AS user, d AS refer
-        ORDER BY b.time
-      """
-
-      result1 = Bolt.query!(Bolt.conn, cypher)
-
-      Logger.info "here is all comments result1"
+      Logger.info "Here is the result1."
       Logger.debug "#{inspect(result1)}"
 
-      thumbs = result
-      comments = result1 |> Enum.map(fn x -> (x["comment"]).properties end)
-      users = result1 |> Enum.map(fn x -> (x["user"]).properties end)
-      refers = result1 |> Enum.map(fn x -> 
-          refer = x["refer"]
-          case refer do
-            nil -> %{}
-            _ -> refer.properties            
-          end
-        end)
+      result2 = Enum.zip(result0, result1) |> Enum.map(fn {x, e} -> Map.put(x, "thumbed", e) end)
 
-      comments = 
-        Enum.zip(comments, users) 
-        |> Enum.map(fn {c, u} -> Map.put(c, "user", u) end)
-        |> Enum.zip(refers)
-        |> Enum.map(fn {c, r} -> Map.put(c, "refer", r) end)
+      Logger.info "Here is the result2."
+      Logger.debug "#{inspect(result2)}"
 
-      x 
-      |> Map.put("thumbs", :erlang.term_to_binary(thumbs))
-      |> Map.put("comments", :erlang.term_to_binary(comments))
-    end)
+      result3 = Enum.map(result2, fn x ->
+        id = x["id"]
+        cypher = """
+          MATCH (a:Post {id: #{id}})<-[b:THUMBED]-(c:User)
+          RETURN c
+          ORDER BY b.time
+        """
+        result = Bolt.query!(Bolt.conn, cypher) |> Enum.map(fn x -> (x["c"]).properties end)
 
-    Logger.info "here is result3"
-    Logger.debug "#{inspect(result3)}"
+        Logger.info "here is thumbed result"
+        Logger.debug "#{inspect(result)}"
 
-    posts = result3
+        cypher = """
+          MATCH (a:Post {id: #{id}})<-[:POINTS_TO]-(b:Comment)-[:BELONGS_TO]->(c:User)
+          OPTIONAL MATCH (b)-[:REFERS_TO]->(d:User)
+          RETURN b AS comment, c AS user, d AS refer
+          ORDER BY b.time
+        """
 
-    cypher = """
-      MATCH (a:User {email: '#{email}'})-[r:FOLLOWS]->(b:User {email: '#{email0}'})
-      RETURN r
-    """
+        result1 = Bolt.query!(Bolt.conn, cypher)
 
-    result = Bolt.query!(Bolt.conn, cypher)
+        Logger.info "here is all comments result1"
+        Logger.debug "#{inspect(result1)}"
 
-    render(conn, "index.html", posts: posts, user: user, flag: result != [], type: "1")
+        thumbs = result
+        comments = result1 |> Enum.map(fn x -> (x["comment"]).properties end)
+        users = result1 |> Enum.map(fn x -> (x["user"]).properties end)
+        refers = result1 |> Enum.map(fn x -> 
+            refer = x["refer"]
+            case refer do
+              nil -> %{}
+              _ -> refer.properties            
+            end
+          end)
+
+        comments = 
+          Enum.zip(comments, users) 
+          |> Enum.map(fn {c, u} -> Map.put(c, "user", u) end)
+          |> Enum.zip(refers)
+          |> Enum.map(fn {c, r} -> Map.put(c, "refer", r) end)
+
+        x 
+        |> Map.put("thumbs", :erlang.term_to_binary(thumbs))
+        |> Map.put("comments", :erlang.term_to_binary(comments))
+      end)
+
+      Logger.info "here is result3"
+      Logger.debug "#{inspect(result3)}"
+
+      posts = result3
+
+      cypher = """
+        MATCH (a:User {email: '#{email}'})-[r:FOLLOWS]->(b:User {email: '#{email0}'})
+        RETURN r
+      """
+
+      result = Bolt.query!(Bolt.conn, cypher)
+
+      render(conn, "index.html", posts: posts, user: user, flag: result != [], type: "1")
+    end
   end
 
   def news(conn, _params) do

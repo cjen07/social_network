@@ -212,7 +212,7 @@ defmodule SocialNetwork.Coherence.RegistrationController do
     Logger.info "Here is deleted user."
     Logger.debug "#{inspect(result)}"
 
-    SocialNetwork.Endpoint.broadcast("user:" <> email, "delete_user", %{email: email})
+    SocialNetwork.Endpoint.broadcast("user:" <> email, "delete_user", %{email: email, name: username})
 
     redirect_to(conn, :registration_delete, params)
   end

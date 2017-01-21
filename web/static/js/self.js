@@ -37,11 +37,14 @@ let self = {
       }
     }
 
+
+
     $.get("/api/friends",
       function (data){
         let friends = data.friends
         let user = $(".userChannel")
         let users = $(".usersChannel")
+        let friend = $(".friendChannel")
         let get_friends = e => {
           let email = e.email
           let name = e.name
@@ -83,6 +86,8 @@ let self = {
           friends.forEach(e => {
             let friendChannel = get_friends(e)
             if (user.length && e.email == user.attr('email')){return}
+            if (!friend.length) {friendChannel.on("delete_user", response.delete_user_delay)} 
+            else {friendChannel.on("delete_user", response.delete_user)}
             friendChannel.on("new_post", response.new_post_delay)
             friendChannel.on("delete_post", response.delete_post_delay)
           })
@@ -102,7 +107,24 @@ let self = {
             let friendChannel = get_friends(e)
             friendChannel.on("new_post", response.new_post)
             friendChannel.on("delete_post", response.delete_post)
+            friendChannel.on("delete_user", response.delete_user_delay)
           })
+        }
+
+
+        if (friend.length){
+          if (sessionStorage.getItem("friend-flag") == "true") {
+            let n = sessionStorage.getItem("friend-data")
+            let m = $.parseJSON(n)
+            response.put_friend_message(m)
+            sessionStorage.setItem("friend-flag", "false")
+          }
+          myChannel.on("new_follower", response.new_follower)
+          myChannel.on("delete_follower", response.delete_follower)
+        }
+        else{
+          myChannel.on("new_follower", response.new_follower_delay)
+          myChannel.on("delete_follower", response.delete_follower_delay)
         }
       }, "json")
     
