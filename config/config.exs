@@ -36,6 +36,15 @@ config :bolt_sips, Bolt,
 config :arc,
   storage: Arc.Storage.Local
 
+# Configures ejabberd:
+config :ejabberd,
+  file: "config/ejabberd.yml",
+  log_path: 'logs/ejabberd.log'
+ 
+# Customize Mnesia directory:
+config :mnesia,
+  dir: 'mnesiadb/'
+
 # %% Coherence Configuration %%   Don't remove this line
 config :coherence,
   user_schema: SocialNetwork.User,

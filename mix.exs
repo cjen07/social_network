@@ -40,7 +40,9 @@ defmodule SocialNetwork.Mixfile do
      {:coherence, "~> 0.3"},
      {:bolt_sips, "~> 0.1"},
      {:arc, "~> 0.6.0"},
-     {:wallaby, "~> 0.14.0"}
+     {:wallaby, "~> 0.14.0"},
+     {:hedwig, "~> 1.0"},
+     {:ejabberd, ">= 16.06.0", github: "processone/ejabberd", tag: "16.06"}
     ]
   end
 
