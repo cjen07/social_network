@@ -1,0 +1,10 @@
+<div class="jumbotron">
+  <h2>Hello World, ejabberd meets Phoenix !</h2>
+
+  <h3>Here is the list of online users:</h3>
+  
+  <%= for user <- @users do %>
+  <p><%= user %></p>
+  <% end %>
+ 
+</div>

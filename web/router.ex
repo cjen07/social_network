@@ -41,6 +41,7 @@ defmodule SocialNetwork.Router do
     pipe_through :browser # Use the default browser stack
 
     get "/", PageController, :index
+    get "/ejabberd", EjabberdController, :index
   end
 
   scope "/", SocialNetwork do
