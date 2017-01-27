@@ -5,6 +5,24 @@
 # is restricted to this project.
 use Mix.Config
 
+config :social_network, SocialNetwork.Robot,
+  adapter: Hedwig.Adapters.XMPP,
+  name: "alfred",
+  aka: "/",
+  # fill in the appropriate jid for your bot
+  jid: "williams@localhost",
+  # fill in the appropriate password for your bot
+  password: "charisma",
+  rooms: [
+    # fill in the appropriate rooms for your XMPP server
+    {"example@conference.localhost", []}
+  ],
+  responders: [
+    {Hedwig.Responders.Help, []},
+    {Hedwig.Responders.Ping, []}
+  ]
+
+
 # General application configuration
 config :social_network,
   ecto_repos: [SocialNetwork.Repo]
