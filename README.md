@@ -38,11 +38,12 @@ Feature
 Goal in short term
   
   * gif instuctions in this readme and online example
-  * private chat, XMPP server and client, hedwig-im and ejabberd
+  * online private chat using phoenix presense
+  * online user mark, private chat button and chat panel
   
 Goal in long term
 
-  * offline notification persistence
+  * offline notification and chat persistence
   * make it dry, and test it by wallaby
   * fewer limitations and hidden bugs
 
