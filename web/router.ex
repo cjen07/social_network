@@ -58,6 +58,7 @@ defmodule SocialNetwork.Router do
     get "/home", PostController, :index
     get "/hub", PostController, :friend
     get "/news", PostController, :news
+    get "/lobby", PageController, :lobby
     post "/home", PostController, :create_post
     delete "/home", PostController, :delete_post
 

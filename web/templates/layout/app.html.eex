@@ -28,6 +28,7 @@
               <li class="nav-home"><a href="/home">Home</a></li>
               <li class="nav-users"><a href="/users">Friends</a></li>
               <li class="nav-news"><a href="/news">News</a></li>
+              <li class="nav-lobby"><a href="/lobby">Lobby</a></li>
             </ul>
           </nav>
         <% end %>

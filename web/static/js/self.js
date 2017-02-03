@@ -1,4 +1,5 @@
 import response from "./response"
+import lobby from "./lobby"
 
 let self = {
 
@@ -37,7 +38,7 @@ let self = {
       }
     }
 
-
+    lobby.init(socket, $(".lobbyChannel"))
 
     $.get("/api/friends",
       function (data){
