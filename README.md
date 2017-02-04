@@ -28,7 +28,7 @@ To start your Phoenix app:
 
 Feature
 
-  * online notification persistence
+  * online notification persistence and online user mark
   * new/delete post/comment/reply/thumb notifications of all pages
   * friend relationship change notification: new follower and following deleted
   * comment or thumb on deleted post, re-delete post/comment and re-thumb notification are settled
@@ -37,9 +37,8 @@ Feature
 
 Goal in short term
   
+  * private chat using phoenix presense: chat button and chat panel
   * gif instuctions in this readme and online example
-  * online private chat using phoenix presense
-  * online user mark, private chat button and chat panel
   
 Goal in long term
 
