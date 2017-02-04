@@ -1,11 +1,13 @@
 import response from "./response"
+import {Presence} from "phoenix"
+// import lobby from "./lobby"
 
 let self = {
 
   init(socket, element){ if(!element.length){ return }
     let email = element.attr('email')
     socket.connect()
-    let myChannel   = socket.channel("user:" + email)
+    let myChannel = socket.channel("user:" + email)
     myChannel.join()
       .receive("ok", resp => console.log("joined my channel", resp) )
       .receive("error", reason => console.log("join my channel failed", reason) )
@@ -36,8 +38,6 @@ let self = {
         response.pick_home_message(m)
       }
     }
-
-
 
     $.get("/api/friends",
       function (data){
@@ -113,6 +113,38 @@ let self = {
 
 
         if (friend.length){
+          // Presence
+          $(".online").each(function(){
+            let email0 = $(this).attr("email")
+            let userChannel = socket.channel("user:" + email0)
+            if (!friends.find(e => e.email == email0)){
+              userChannel.join()
+                .receive("ok", resp => console.log("joined a stranger channel", resp) )
+                .receive("error", reason => console.log("join a stranger channel failed", reason) )
+            }
+            let presences = {}
+            let flag = false
+            var timer
+            userChannel.on("presence_diff", diff => {
+              presences = Presence.syncDiff(presences, diff)
+              if (jQuery.isEmptyObject(presences)){
+                flag = true
+                timer = setTimeout(function(){
+                  flag = false
+                  $(".online[email='" + email0 + "']").text("No")
+                }, 1000);
+              }
+              else{
+                if (flag){
+                  clearTimeout(timer)
+                }
+                else{
+                  $(".online[email='" + email0 + "']").text("Yes")
+                }
+              }
+            })
+          })
+
           if (sessionStorage.getItem("friend-flag") == "true") {
             let n = sessionStorage.getItem("friend-data")
             let m = $.parseJSON(n)

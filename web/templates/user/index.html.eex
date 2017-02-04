@@ -49,6 +49,7 @@
     <tr>
       <th>avatar</th>
       <th>name</th>
+      <th>online</th>
       <th>email</th>
     </tr>
   </thead>
@@ -57,6 +58,13 @@
     <tr>
       <td><%= img_tag(Exgravatar.gravatar_url(user["email"], secure: false, s: 30))%></td>
       <td><%= user["name"] %></td>
+      <td class="online" email='<%= user["email"] %>'>
+        <%= if user["online"] do %>
+          Yes
+        <% else %>
+          No
+        <% end %>
+      </td>
       <td><%= user["email"] %></td>
 
       <td class="text-right">

@@ -21,7 +21,12 @@ defmodule SocialNetwork.UserController do
     Logger.info "Here is the result."
     Logger.debug "#{inspect(result)}"
 
-    users = result
+    users = 
+    Enum.map(result, fn x ->
+      presence = Phoenix.Presence.list(SocialNetwork.Presence, "user:" <> x["email"])
+      Map.put(x, "online", presence != %{})
+    end)
+
     now = :erlang.term_to_binary(%{"name" => username, "email" => email})
     render(conn, "index.html", users: users,
       now: now, fof: false, search: false)
@@ -104,7 +109,12 @@ defmodule SocialNetwork.UserController do
     Logger.info "Here is the result2."
     Logger.debug "#{inspect(result2)}"
 
-    users = result2
+    users = 
+    Enum.map(result2, fn x ->
+      presence = Phoenix.Presence.list(SocialNetwork.Presence, "user:" <> x["email"])
+      Map.put(x, "online", presence != %{})
+    end)
+
     now = :erlang.term_to_binary(Map.put(search, "search", true))
     render(conn, "index.html", users: users, search: true,
      fof: false, now: now)
@@ -175,7 +185,12 @@ defmodule SocialNetwork.UserController do
       Logger.info "Here is the result2."
       Logger.debug "#{inspect(result2)}"
 
-      users = result2
+      users = 
+      Enum.map(result2, fn x ->
+        presence = Phoenix.Presence.list(SocialNetwork.Presence, "user:" <> x["email"])
+        Map.put(x, "online", presence != %{})
+      end)
+      
       now = :erlang.term_to_binary(user)
       render(conn, "index.html", users: users, now: now, fof: true, search: false)
 
