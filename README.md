@@ -3,7 +3,7 @@
 Remark
   
   * Very welcome to anyone who is willing to try it out and give any suggestions
-  * All releases are working well and this respository is still under rapid development
+  * All releases are working well and this branch is still under development
 
 To setup
 
