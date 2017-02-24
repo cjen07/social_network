@@ -2,8 +2,7 @@
 
 Remark
   
-  * Very welcome to anyone who is willing to try it out and give any suggestions
-  * All releases are working well and this respository is still under rapid development
+  * this branch is experimental and will be re-explored with interest in ejabberd 
   * Erlang OTP 19 does not work with embeded ejabberd in phoenix, but 18 does
 
 To setup
