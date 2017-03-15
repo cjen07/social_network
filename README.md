@@ -38,7 +38,7 @@ Feature
 Goal in short term
   
   * private chat using phoenix presense: chat button and chat panel
-  * gif instuctions in this readme and online example
+  * gif instuctions in this readme and online example using https
   
 Goal in long term
 
